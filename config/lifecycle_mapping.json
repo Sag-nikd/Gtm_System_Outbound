@@ -1,0 +1,29 @@
+{
+  "stages": [
+    "New ICP Account",
+    "Scored Account",
+    "Enriched Account",
+    "Contact Discovery Approved",
+    "Contact Validated",
+    "Ready for Outreach",
+    "Sequenced",
+    "Engaged",
+    "Meeting Booked",
+    "Opportunity Created",
+    "Closed Won",
+    "Closed Lost",
+    "Nurture",
+    "Suppressed"
+  ],
+  "company_lifecycle_rules": {
+    "tier_1_enriched": "Contact Discovery Approved",
+    "tier_2_enriched": "Contact Discovery Approved",
+    "tier_3_enriched": "Enriched Account",
+    "disqualified": "Suppressed"
+  },
+  "contact_lifecycle_rules": {
+    "approved": "Contact Validated",
+    "review": "Nurture",
+    "suppressed": "Suppressed"
+  }
+}

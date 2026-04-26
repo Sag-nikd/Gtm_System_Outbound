@@ -1,0 +1,122 @@
+[
+  {
+    "contact_id": "K001",
+    "company_id": "C001",
+    "first_name": "Angela",
+    "last_name": "Morrison",
+    "title": "VP Member Engagement",
+    "email": "angela.morrison@centenehealthpartners.com",
+    "linkedin_url": "https://linkedin.com/in/angela-morrison-c001",
+    "persona_type": "VP Member Engagement"
+  },
+  {
+    "contact_id": "K002",
+    "company_id": "C001",
+    "first_name": "Derek",
+    "last_name": "Okafor",
+    "title": "Director Medicaid Operations",
+    "email": "derek.okafor@centenehealthpartners.com",
+    "linkedin_url": "https://linkedin.com/in/derek-okafor-c001",
+    "persona_type": "Director Medicaid Operations"
+  },
+  {
+    "contact_id": "K003",
+    "company_id": "C001",
+    "first_name": "Sandra",
+    "last_name": "Chu",
+    "title": "Chief Digital Officer",
+    "email": "sandra.chu@centenehealthpartners.com",
+    "linkedin_url": "https://linkedin.com/in/sandra-chu-c001",
+    "persona_type": "Chief Digital Officer"
+  },
+  {
+    "contact_id": "K004",
+    "company_id": "C002",
+    "first_name": "Marcus",
+    "last_name": "Reid",
+    "title": "VP Member Engagement",
+    "email": "marcus.reid@bluepathhealth.com",
+    "linkedin_url": "https://linkedin.com/in/marcus-reid-c002",
+    "persona_type": "VP Member Engagement"
+  },
+  {
+    "contact_id": "K005",
+    "company_id": "C002",
+    "first_name": "Priya",
+    "last_name": "Nair",
+    "title": "Director Member Services",
+    "email": "priya.nair@bluepathhealth.com",
+    "linkedin_url": "https://linkedin.com/in/priya-nair-c002",
+    "persona_type": "Director Member Services"
+  },
+  {
+    "contact_id": "K006",
+    "company_id": "C003",
+    "first_name": "James",
+    "last_name": "Whitfield",
+    "title": "VP Member Engagement",
+    "email": "james.whitfield@meridiancaresolutions.com",
+    "linkedin_url": "https://linkedin.com/in/james-whitfield-c003",
+    "persona_type": "VP Member Engagement"
+  },
+  {
+    "contact_id": "K007",
+    "company_id": "C003",
+    "first_name": "Linda",
+    "last_name": "Park",
+    "title": "Director Medicaid Operations",
+    "email": "linda.park@meridiancaresolutions.com",
+    "linkedin_url": "https://linkedin.com/in/linda-park-c003",
+    "persona_type": "Director Medicaid Operations"
+  },
+  {
+    "contact_id": "K008",
+    "company_id": "C004",
+    "first_name": "Carlos",
+    "last_name": "Rivera",
+    "title": "Chief Digital Officer",
+    "email": "carlos.rivera@elevancecommunity.com",
+    "linkedin_url": "https://linkedin.com/in/carlos-rivera-c004",
+    "persona_type": "Chief Digital Officer"
+  },
+  {
+    "contact_id": "K009",
+    "company_id": "C004",
+    "first_name": "invalid_user",
+    "last_name": "Test",
+    "title": "Director Member Services",
+    "email": "invalid.email@elevancecommunity.com",
+    "linkedin_url": "https://linkedin.com/in/invalid-test-c004",
+    "persona_type": "Director Member Services"
+  },
+  {
+    "contact_id": "K010",
+    "company_id": "C005",
+    "first_name": "Rachel",
+    "last_name": "Stone",
+    "title": "Revenue Operations Manager",
+    "email": "rachel.stone@novacaredh.com",
+    "linkedin_url": "https://linkedin.com/in/rachel-stone-c005",
+    "persona_type": "Revenue Operations Manager"
+  },
+  {
+    "contact_id": "K011",
+    "company_id": "C005",
+    "first_name": "Tom",
+    "last_name": "risky_account",
+    "title": "VP Customer Experience",
+    "email": "tom.risky@novacaredh.com",
+    "linkedin_url": "https://linkedin.com/in/tom-risky-c005",
+    "persona_type": "VP Customer Experience"
+  },
+  {
+    "contact_id": "K012",
+    "company_id": "C006",
+    "first_name": "Natalie",
+    "last_name": "Brooks",
+    "title": "VP Population Health",
+    "email": "natalie.brooks@riversideregional.org",
+    "linkedin_url": "https://linkedin.com/in/natalie-brooks-c006",
+    "persona_type": "VP Population Health"
+  }
+]

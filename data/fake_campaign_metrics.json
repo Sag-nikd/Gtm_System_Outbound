@@ -1,0 +1,50 @@
+[
+  {
+    "campaign_name": "HealConnect Member Engagement - Tier 1",
+    "emails_sent": 320,
+    "open_rate": 0.42,
+    "reply_rate": 0.06,
+    "positive_reply_rate": 0.04,
+    "bounce_rate": 0.02,
+    "unsubscribe_rate": 0.008,
+    "spam_rate": 0.001,
+    "meetings_booked": 8,
+    "domain_health_score": 88
+  },
+  {
+    "campaign_name": "HealConnect Member Engagement - Tier 2",
+    "emails_sent": 210,
+    "open_rate": 0.34,
+    "reply_rate": 0.03,
+    "positive_reply_rate": 0.02,
+    "bounce_rate": 0.015,
+    "unsubscribe_rate": 0.01,
+    "spam_rate": 0.002,
+    "meetings_booked": 4,
+    "domain_health_score": 81
+  },
+  {
+    "campaign_name": "Medicaid Operations Outreach - Wave 1",
+    "emails_sent": 180,
+    "open_rate": 0.27,
+    "reply_rate": 0.015,
+    "positive_reply_rate": 0.008,
+    "bounce_rate": 0.055,
+    "unsubscribe_rate": 0.012,
+    "spam_rate": 0.004,
+    "meetings_booked": 1,
+    "domain_health_score": 62
+  },
+  {
+    "campaign_name": "Digital Health Platform - CDO Sequence",
+    "emails_sent": 95,
+    "open_rate": 0.38,
+    "reply_rate": 0.04,
+    "positive_reply_rate": 0.03,
+    "bounce_rate": 0.01,
+    "unsubscribe_rate": 0.005,
+    "spam_rate": 0.001,
+    "meetings_booked": 3,
+    "domain_health_score": 92
+  }
+]
