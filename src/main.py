@@ -1,20 +1,20 @@
 """
 GTM System MVP — main orchestrator.
-Runs the full pipeline end-to-end and writes 16 checkpoint CSV files to outputs/.
+Runs the full pipeline end-to-end and writes checkpoint CSV files to outputs/.
 
-This Python layer acts as the integration orchestration engine (like Zapier/n8n),
-connecting each GTM stage: ingestion ->enrichment ->scoring ->validation →
-CRM sync ->outreach export ->campaign monitoring.
+Pipeline: Apollo ingestion -> Clay enrichment -> ICP scoring -> Contact discovery
+          -> Email validation -> HubSpot sync -> Outreach export -> Campaign monitoring
 """
 
+from __future__ import annotations
+import logging
 import os
 import sys
 
 import pandas as pd
 
-# Resolve paths relative to this file so the script works from any working directory
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_DIR = os.path.join(BASE_DIR, "data")
+BASE_DIR   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR   = os.path.join(BASE_DIR, "data")
 CONFIG_DIR = os.path.join(BASE_DIR, "config")
 OUTPUT_DIR = os.path.join(BASE_DIR, "outputs")
 
@@ -38,61 +38,68 @@ from src.outreach.sequence_export import (
 )
 from src.monitoring.campaign_health import load_campaign_metrics, evaluate_all_campaigns
 
+logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
+log = logging.getLogger(__name__)
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
 def save(df: pd.DataFrame, filename: str) -> str:
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
     path = os.path.join(OUTPUT_DIR, filename)
     df.to_csv(path, index=False)
     return path
 
 
-def main() -> None:
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+# ── Stage functions ───────────────────────────────────────────────────────────
 
-    # ── 01  Company ingestion ──────────────────────────────────────────────
+def run_ingestion() -> list[dict]:
     companies = load_companies(os.path.join(DATA_DIR, "fake_companies.json"))
-    df01 = pd.DataFrame(companies)[[
+    cols = [
         "company_id", "company_name", "website", "domain", "industry",
         "employee_count", "revenue_range", "state",
         "medicaid_members", "medicare_members",
         "growth_signal", "hiring_signal", "tech_stack_signal",
         "ingestion_source", "ingestion_status",
-    ]]
-    save(df01, "01_apollo_company_ingestion.csv")
-    print(f"[01] Apollo/company ingestion completed ->outputs/01_apollo_company_ingestion.csv")
+    ]
+    save(pd.DataFrame(companies)[cols], "01_apollo_company_ingestion.csv")
+    log.info("01 Apollo ingestion — %d companies loaded", len(companies))
+    return companies
 
-    # ── 02  Clay enrichment ───────────────────────────────────────────────
+
+def run_enrichment_and_scoring(companies: list[dict]) -> list[dict]:
     icp_rules = load_icp_rules(os.path.join(CONFIG_DIR, "icp_rules.json"))
-    # Score first so enrichment can read icp_tier
-    scored_temp = score_companies([dict(c) for c in companies], icp_rules)
-    enriched_companies = enrich_accounts(scored_temp)
+    scored    = score_companies([dict(c) for c in companies], icp_rules)
+    enriched  = enrich_accounts(scored)
 
-    df02 = pd.DataFrame(enriched_companies)[[
+    enrichment_cols = [
         "company_id", "company_name", "domain", "industry", "employee_count",
         "state", "medicaid_members", "medicare_members",
         "growth_signal", "hiring_signal", "tech_stack_signal",
         "enrichment_status", "enrichment_source",
         "recommended_personas", "enriched_signal_summary",
-    ]]
-    save(df02, "02_clay_enriched_accounts.csv")
-    print(f"[02] Clay enrichment completed ->outputs/02_clay_enriched_accounts.csv")
-
-    # ── 03  ICP scoring ───────────────────────────────────────────────────
-    df03 = pd.DataFrame(enriched_companies)[[
+    ]
+    scoring_cols = [
         "company_id", "company_name", "domain", "industry", "employee_count",
         "state", "total_member_volume",
         "industry_score", "member_volume_score", "employee_count_score",
         "growth_signal_score", "hiring_signal_score", "tech_stack_score",
         "icp_score", "icp_tier", "score_reason", "tier_reason",
-    ]]
-    save(df03, "03_icp_scored_accounts.csv")
-    print(f"[03] ICP scoring completed ->outputs/03_icp_scored_accounts.csv")
+    ]
+    save(pd.DataFrame(enriched)[enrichment_cols], "02_clay_enriched_accounts.csv")
+    save(pd.DataFrame(enriched)[scoring_cols],    "03_icp_scored_accounts.csv")
 
-    # ── 04  Tier distribution ─────────────────────────────────────────────
+    t1 = sum(1 for c in enriched if c["icp_tier"] == "Tier 1")
+    t2 = sum(1 for c in enriched if c["icp_tier"] == "Tier 2")
+    log.info("02-03 Clay + ICP scoring — Tier 1: %d  Tier 2: %d  of %d", t1, t2, len(enriched))
+    return enriched
+
+
+def run_tier_distribution(enriched: list[dict]) -> None:
     tier_counts = (
-        pd.DataFrame(enriched_companies)["icp_tier"]
+        pd.DataFrame(enriched)["icp_tier"]
         .value_counts()
         .reset_index()
-        .rename(columns={"icp_tier": "icp_tier", "count": "account_count"})
     )
     tier_counts.columns = ["icp_tier", "account_count"]
     total = tier_counts["account_count"].sum()
@@ -100,15 +107,13 @@ def main() -> None:
         tier_counts["account_count"] / total * 100
     ).map(lambda x: f"{x:.1f}%")
     save(tier_counts, "04_icp_tier_distribution.csv")
-    print(f"[04] ICP tier distribution completed ->outputs/04_icp_tier_distribution.csv")
+    log.info("04 Tier distribution saved")
 
-    # ── 05  Approved accounts ─────────────────────────────────────────────
-    approved_companies = [
-        c for c in enriched_companies if c.get("contact_discovery_approved")
-    ]
-    df05_rows = []
-    for c in enriched_companies:
-        df05_rows.append({
+
+def run_approved_accounts(enriched: list[dict]) -> list[dict]:
+    rows = []
+    for c in enriched:
+        rows.append({
             "company_id": c["company_id"],
             "company_name": c["company_name"],
             "domain": c["domain"],
@@ -124,78 +129,67 @@ def main() -> None:
                 else f"{c['icp_tier']} — not approved"
             ),
         })
-    save(pd.DataFrame(df05_rows), "05_approved_accounts_for_contact_discovery.csv")
-    print(f"[05] Approved accounts exported ->outputs/05_approved_accounts_for_contact_discovery.csv")
+    save(pd.DataFrame(rows), "05_approved_accounts_for_contact_discovery.csv")
+    approved = [c for c in enriched if c.get("contact_discovery_approved")]
+    log.info("05 Approved accounts — %d approved, %d blocked", len(approved), len(enriched) - len(approved))
+    return approved
 
-    # ── 06  Contact discovery ─────────────────────────────────────────────
+
+def run_contact_discovery(enriched: list[dict], approved_cos: list[dict]) -> list[dict]:
     all_contacts = load_contacts(os.path.join(DATA_DIR, "fake_contacts.json"))
-    company_tier_map = {c["company_id"]: c["icp_tier"] for c in enriched_companies}
-    company_name_map = {c["company_id"]: c["company_name"] for c in enriched_companies}
+    co_name_map  = {c["company_id"]: c["company_name"] for c in enriched}
+    co_tier_map  = {c["company_id"]: c["icp_tier"]     for c in enriched}
 
-    filtered_contacts = filter_contacts_for_approved_accounts(all_contacts, approved_companies)
-    for ct in filtered_contacts:
-        ct["icp_tier"] = company_tier_map.get(ct["company_id"], "")
-        ct["company_name"] = company_name_map.get(ct["company_id"], "")
-        ct["contact_source"] = "fake_data"   # Future: Apollo, Clay
+    contacts = filter_contacts_for_approved_accounts(all_contacts, approved_cos)
+    for ct in contacts:
+        ct["icp_tier"]                 = co_tier_map.get(ct["company_id"], "")
+        ct["company_name"]             = co_name_map.get(ct["company_id"], "")
+        ct["contact_source"]           = "fake_data"
         ct["contact_discovery_status"] = "discovered"
 
-    df06_cols = [
+    cols = [
         "contact_id", "company_id", "company_name", "first_name", "last_name",
         "title", "email", "linkedin_url", "persona_type",
         "icp_tier", "contact_source", "contact_discovery_status",
     ]
-    save(pd.DataFrame(filtered_contacts)[df06_cols], "06_discovered_contacts.csv")
-    print(f"[06] Contact discovery completed ->outputs/06_discovered_contacts.csv")
+    save(pd.DataFrame(contacts)[cols], "06_discovered_contacts.csv")
+    log.info("06 Contact discovery — %d contacts found", len(contacts))
+    return contacts
 
-    # ── 07  ZeroBounce validation ──────────────────────────────────────────
-    # Run validation pipeline (adds zb + nb + final fields)
-    validated_contacts = validate_contacts([dict(c) for c in filtered_contacts])
 
-    df07_cols = [
-        "contact_id", "company_id", "company_name",
-        "first_name", "last_name", "email",
+def run_validation(contacts: list[dict]) -> list[dict]:
+    validated = validate_contacts([dict(c) for c in contacts])
+
+    zb_cols = [
+        "contact_id", "company_id", "company_name", "first_name", "last_name", "email",
         "zerobounce_status", "zerobounce_reason",
     ]
-    for ct in validated_contacts:
-        ct["validation_step"] = "zerobounce_mock"
-    save(
-        pd.DataFrame(validated_contacts)[df07_cols + ["validation_step"]],
-        "07_zerobounce_validation.csv",
-    )
-    print(f"[07] ZeroBounce validation completed ->outputs/07_zerobounce_validation.csv")
-
-    # ── 08  NeverBounce validation ────────────────────────────────────────
-    df08_cols = [
-        "contact_id", "company_id", "company_name",
-        "first_name", "last_name", "email",
+    nb_cols = [
+        "contact_id", "company_id", "company_name", "first_name", "last_name", "email",
         "zerobounce_status", "neverbounce_status", "neverbounce_reason",
     ]
-    for ct in validated_contacts:
-        ct["validation_step"] = "neverbounce_mock"
-    save(
-        pd.DataFrame(validated_contacts)[df08_cols + ["validation_step"]],
-        "08_neverbounce_validation.csv",
-    )
-    print(f"[08] NeverBounce validation completed ->outputs/08_neverbounce_validation.csv")
-
-    # ── 09  Final validated contacts ──────────────────────────────────────
-    df09_cols = [
+    final_cols = [
         "contact_id", "company_id", "company_name", "first_name", "last_name",
         "title", "email", "linkedin_url", "persona_type", "icp_tier",
         "zerobounce_status", "neverbounce_status",
         "final_validation_status", "final_validation_reason",
     ]
-    save(pd.DataFrame(validated_contacts)[df09_cols], "09_final_validated_contacts.csv")
-    print(f"[09] Final validation completed ->outputs/09_final_validated_contacts.csv")
+    save(pd.DataFrame(validated)[zb_cols],    "07_zerobounce_validation.csv")
+    save(pd.DataFrame(validated)[nb_cols],    "08_neverbounce_validation.csv")
+    save(pd.DataFrame(validated)[final_cols], "09_final_validated_contacts.csv")
 
-    # ── 10  Approved contacts ─────────────────────────────────────────────
-    approved_contacts = [
-        c for c in validated_contacts if c.get("final_validation_status") == "approved"
-    ]
-    df10_rows = []
-    for ct in validated_contacts:
+    approved   = sum(1 for c in validated if c.get("final_validation_status") == "approved")
+    review     = sum(1 for c in validated if c.get("final_validation_status") == "review")
+    suppressed = sum(1 for c in validated if c.get("final_validation_status") == "suppressed")
+    log.info("07-09 Validation — approved: %d  review: %d  suppressed: %d", approved, review, suppressed)
+    return validated
+
+
+def run_approved_contacts(validated: list[dict]) -> list[dict]:
+    rows = []
+    for ct in validated:
         status = ct.get("final_validation_status")
-        df10_rows.append({
+        rows.append({
             "contact_id": ct["contact_id"],
             "company_id": ct["company_id"],
             "company_name": ct.get("company_name", ""),
@@ -207,58 +201,74 @@ def main() -> None:
             "persona_type": ct["persona_type"],
             "icp_tier": ct.get("icp_tier", ""),
             "final_validation_status": status,
-            "approved_for_hubspot": status in ("approved", "review"),
+            "approved_for_hubspot":  status in ("approved", "review"),
             "approved_for_outreach": status == "approved",
         })
-    save(pd.DataFrame(df10_rows), "10_approved_contacts_for_hubspot_and_outreach.csv")
-    print(f"[10] Approved contacts exported ->outputs/10_approved_contacts_for_hubspot_and_outreach.csv")
+    save(pd.DataFrame(rows), "10_approved_contacts_for_hubspot_and_outreach.csv")
+    approved = [ct for ct in validated if ct.get("final_validation_status") == "approved"]
+    log.info("10 Approved contacts — %d ready for outreach", len(approved))
+    return approved
 
-    # ── 11  HubSpot companies ─────────────────────────────────────────────
-    hs_companies = create_hubspot_company_records(enriched_companies)
+
+def run_hubspot_sync(enriched: list[dict], validated: list[dict]) -> tuple[list[dict], list[dict]]:
+    hs_companies = create_hubspot_company_records(enriched)
+    hs_contacts  = create_hubspot_contact_records(validated, enriched)
     save(pd.DataFrame(hs_companies), "11_hubspot_companies.csv")
-    print(f"[11] HubSpot companies export completed ->outputs/11_hubspot_companies.csv")
+    save(pd.DataFrame(hs_contacts),  "12_hubspot_contacts.csv")
+    log.info("11-12 HubSpot sync — %d companies, %d contacts", len(hs_companies), len(hs_contacts))
+    return hs_companies, hs_contacts
 
-    # ── 12  HubSpot contacts ──────────────────────────────────────────────
-    hs_contacts = create_hubspot_contact_records(validated_contacts, enriched_companies)
-    save(pd.DataFrame(hs_contacts), "12_hubspot_contacts.csv")
-    print(f"[12] HubSpot contacts export completed ->outputs/12_hubspot_contacts.csv")
 
-    # ── 13  Email sequence export ─────────────────────────────────────────
-    # Attach company_name to each contact for sequence exports
+def run_outreach_export(approved_contacts: list[dict], enriched: list[dict]) -> tuple[list[dict], list[dict]]:
+    co_name_map = {c["company_id"]: c["company_name"] for c in enriched}
     for ct in approved_contacts:
         if not ct.get("company_name"):
-            ct["company_name"] = company_name_map.get(ct["company_id"], "")
+            ct["company_name"] = co_name_map.get(ct["company_id"], "")
 
-    email_export = create_email_sequence_export(approved_contacts)
-    save(pd.DataFrame(email_export), "13_email_sequence_export.csv")
-    print(f"[13] Email sequence export completed ->outputs/13_email_sequence_export.csv")
-
-    # ── 14  LinkedIn sequence export ──────────────────────────────────────
+    email_export    = create_email_sequence_export(approved_contacts)
     linkedin_export = create_linkedin_sequence_export(approved_contacts)
+    save(pd.DataFrame(email_export),    "13_email_sequence_export.csv")
     save(pd.DataFrame(linkedin_export), "14_linkedin_sequence_export.csv")
-    print(f"[14] LinkedIn sequence export completed ->outputs/14_linkedin_sequence_export.csv")
+    log.info("13-14 Outreach export — %d email, %d LinkedIn sequences", len(email_export), len(linkedin_export))
+    return email_export, linkedin_export
 
-    # ── 15  Campaign metrics input ────────────────────────────────────────
-    raw_metrics = load_campaign_metrics(os.path.join(DATA_DIR, "fake_campaign_metrics.json"))
-    save(pd.DataFrame(raw_metrics), "15_campaign_metrics_input.csv")
-    print(f"[15] Campaign metrics input exported ->outputs/15_campaign_metrics_input.csv")
 
-    # ── 16  Campaign health report ────────────────────────────────────────
+def run_campaign_monitoring() -> tuple[list[dict], list[dict]]:
+    raw_metrics   = load_campaign_metrics(os.path.join(DATA_DIR, "fake_campaign_metrics.json"))
     health_report = evaluate_all_campaigns(raw_metrics)
+    save(pd.DataFrame(raw_metrics),   "15_campaign_metrics_input.csv")
     save(pd.DataFrame(health_report), "16_campaign_health_report.csv")
-    print(f"[16] Campaign health report completed ->outputs/16_campaign_health_report.csv")
+    critical = sum(1 for h in health_report if h.get("health_status") == "critical")
+    log.info("15-16 Campaign monitoring — %d campaigns, %d critical", len(health_report), critical)
+    return raw_metrics, health_report
 
-    # ── Summary ───────────────────────────────────────────────────────────
+
+# ── Orchestrator ──────────────────────────────────────────────────────────────
+
+def main() -> None:
+    log.info("GTM pipeline starting")
+
+    companies       = run_ingestion()
+    enriched        = run_enrichment_and_scoring(companies)
+    run_tier_distribution(enriched)
+    approved_cos    = run_approved_accounts(enriched)
+    contacts        = run_contact_discovery(enriched, approved_cos)
+    validated       = run_validation(contacts)
+    approved_cts    = run_approved_contacts(validated)
+    run_hubspot_sync(enriched, validated)
+    email_exp, li_exp = run_outreach_export(approved_cts, enriched)
+    run_campaign_monitoring()
+
+    log.info("Pipeline complete — 16 CSV files written to outputs/")
     print()
     print(f"  Companies loaded:          {len(companies)}")
-    print(f"  Companies approved:        {len(approved_companies)}")
-    print(f"  Contacts discovered:       {len(filtered_contacts)}")
-    print(f"  Contacts validated:        {len(validated_contacts)}")
-    print(f"  Contacts approved:         {len(approved_contacts)}")
-    print(f"  Email sequence records:    {len(email_export)}")
-    print(f"  LinkedIn sequence records: {len(linkedin_export)}")
+    print(f"  Companies approved:        {len(approved_cos)}")
+    print(f"  Contacts discovered:       {len(contacts)}")
+    print(f"  Contacts validated:        {len(validated)}")
+    print(f"  Contacts approved:         {len(approved_cts)}")
+    print(f"  Email sequence records:    {len(email_exp)}")
+    print(f"  LinkedIn sequence records: {len(li_exp)}")
     print()
-    print("GTM system MVP run completed successfully.")
 
 
 if __name__ == "__main__":
