@@ -1,0 +1,237 @@
+crm: salesforce
+
+objects:
+  company: Account
+  contact: Contact
+  deal: Opportunity
+  lead: Lead
+
+custom_fields:
+  Account:
+    - internal_name: ICP_Score__c
+      label: ICP Score
+      type: Number
+      precision: 5
+      scale: 2
+      description: Numeric fit score from GTM scoring engine
+
+    - internal_name: ICP_Tier__c
+      label: ICP Tier
+      type: Picklist
+      options:
+        - Tier 1
+        - Tier 2
+        - Tier 3
+        - Rejected
+      description: Account tier based on ICP score
+
+    - internal_name: Account_Source_GTM__c
+      label: Account Source (GTM)
+      type: Text
+      length: 255
+      description: Source of account data
+
+    - internal_name: Enrichment_Status__c
+      label: Enrichment Status
+      type: Picklist
+      options:
+        - Not Started
+        - Enriched
+        - Failed
+        - Needs Review
+
+    - internal_name: Fit_Reason__c
+      label: Fit Reason
+      type: LongTextArea
+      length: 32768
+
+    - internal_name: GTM_Segment__c
+      label: GTM Segment
+      type: Picklist
+      options:
+        - Enterprise
+        - Mid-Market
+        - SMB
+        - Startup
+        - Unknown
+
+    - internal_name: Target_Market__c
+      label: Target Market
+      type: Text
+      length: 255
+
+    - internal_name: Last_Scored_Date__c
+      label: Last Scored Date
+      type: Date
+
+  Contact:
+    - internal_name: Email_Validation_Status__c
+      label: Email Validation Status
+      type: Picklist
+      options:
+        - Valid
+        - Invalid
+        - Risky
+        - Catch-All
+        - Unknown
+
+    - internal_name: Persona_Match__c
+      label: Persona Match
+      type: Checkbox
+      default: false
+
+    - internal_name: Buyer_Persona__c
+      label: Buyer Persona
+      type: Picklist
+      options:
+        - Founder
+        - CEO
+        - CRO
+        - VP Sales
+        - RevOps
+        - Marketing
+        - Operations
+        - IT
+        - Other
+
+    - internal_name: Outreach_Channel__c
+      label: Outreach Channel
+      type: Picklist
+      options:
+        - Email
+        - LinkedIn
+        - Phone
+        - Multi-Channel
+        - None
+
+    - internal_name: Sequence_Status__c
+      label: Sequence Status
+      type: Picklist
+      options:
+        - Not Added
+        - Added
+        - Active
+        - Replied
+        - Bounced
+        - Unsubscribed
+        - Completed
+
+    - internal_name: Contact_Source_GTM__c
+      label: Contact Source (GTM)
+      type: Text
+      length: 255
+
+    - internal_name: LinkedIn_URL__c
+      label: LinkedIn URL
+      type: URL
+
+  Lead:
+    - internal_name: Email_Validation_Status__c
+      label: Email Validation Status
+      type: Picklist
+      options:
+        - Valid
+        - Invalid
+        - Risky
+        - Catch-All
+        - Unknown
+
+    - internal_name: Buyer_Persona__c
+      label: Buyer Persona
+      type: Picklist
+      options:
+        - Founder
+        - CEO
+        - CRO
+        - VP Sales
+        - RevOps
+        - Marketing
+        - Operations
+        - IT
+        - Other
+
+    - internal_name: ICP_Score__c
+      label: ICP Score
+      type: Number
+      precision: 5
+      scale: 2
+
+    - internal_name: GTM_Segment__c
+      label: GTM Segment
+      type: Picklist
+      options:
+        - Enterprise
+        - Mid-Market
+        - SMB
+        - Startup
+        - Unknown
+
+  Opportunity:
+    - internal_name: GTM_Campaign_Source__c
+      label: GTM Campaign Source
+      type: Text
+      length: 255
+
+    - internal_name: Scoring_Snapshot__c
+      label: Scoring Snapshot
+      type: LongTextArea
+      length: 32768
+
+    - internal_name: Original_ICP_Score__c
+      label: Original ICP Score
+      type: Number
+      precision: 5
+      scale: 2
+
+    - internal_name: Outbound_Motion__c
+      label: Outbound Motion
+      type: Picklist
+      options:
+        - Founder-Led
+        - SDR-Led
+        - AE-Led
+        - Partner-Led
+        - Other
+
+    - internal_name: Meeting_Source__c
+      label: Meeting Source
+      type: Picklist
+      options:
+        - Cold Email
+        - LinkedIn
+        - Referral
+        - Event
+        - Website
+        - Other
+
+pipeline:
+  name: GTM Outbound Pipeline
+  object: Opportunity
+  stages:
+    - name: Target Account Identified
+      probability: 10
+      forecast_category: Pipeline
+    - name: Contact Validated
+      probability: 20
+      forecast_category: Pipeline
+    - name: Outreach Started
+      probability: 30
+      forecast_category: Pipeline
+    - name: Positive Reply
+      probability: 40
+      forecast_category: Pipeline
+    - name: Meeting Booked
+      probability: 50
+      forecast_category: Pipeline
+    - name: Qualified Opportunity
+      probability: 70
+      forecast_category: BestCase
+    - name: Proposal / Evaluation
+      probability: 80
+      forecast_category: Commit
+    - name: Closed Won
+      probability: 100
+      forecast_category: ClosedWon
+    - name: Closed Lost
+      probability: 0
+      forecast_category: ClosedLost

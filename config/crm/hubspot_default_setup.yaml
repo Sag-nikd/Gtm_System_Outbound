@@ -1,0 +1,256 @@
+crm: hubspot
+
+objects:
+  company: companies
+  contact: contacts
+  deal: deals
+
+custom_fields:
+  companies:
+    - internal_name: icp_score
+      label: ICP Score
+      type: number
+      description: Numeric fit score from GTM scoring engine
+      group: gtm_properties
+
+    - internal_name: icp_tier
+      label: ICP Tier
+      type: enumeration
+      options:
+        - label: Tier 1
+          value: tier_1
+        - label: Tier 2
+          value: tier_2
+        - label: Tier 3
+          value: tier_3
+        - label: Rejected
+          value: rejected
+      description: Account tier based on ICP score
+      group: gtm_properties
+
+    - internal_name: account_source
+      label: Account Source
+      type: string
+      description: Source of company data (Apollo, Clay, CSV, HubSpot, Salesforce)
+      group: gtm_properties
+
+    - internal_name: enrichment_status
+      label: Enrichment Status
+      type: enumeration
+      options:
+        - label: Not Started
+          value: not_started
+        - label: Enriched
+          value: enriched
+        - label: Failed
+          value: failed
+        - label: Needs Review
+          value: needs_review
+      group: gtm_properties
+
+    - internal_name: fit_reason
+      label: Fit Reason
+      type: string
+      description: Human-readable explanation of why the account was scored as a fit
+      group: gtm_properties
+
+    - internal_name: gtm_segment
+      label: GTM Segment
+      type: enumeration
+      options:
+        - label: Enterprise
+          value: enterprise
+        - label: Mid-Market
+          value: mid_market
+        - label: SMB
+          value: smb
+        - label: Startup
+          value: startup
+        - label: Unknown
+          value: unknown
+      group: gtm_properties
+
+    - internal_name: target_market
+      label: Target Market
+      type: string
+      group: gtm_properties
+
+    - internal_name: last_scored_date
+      label: Last Scored Date
+      type: date
+      group: gtm_properties
+
+  contacts:
+    - internal_name: email_validation_status
+      label: Email Validation Status
+      type: enumeration
+      options:
+        - label: Valid
+          value: valid
+        - label: Invalid
+          value: invalid
+        - label: Risky
+          value: risky
+        - label: Catch-All
+          value: catch_all
+        - label: Unknown
+          value: unknown
+      group: gtm_properties
+
+    - internal_name: persona_match
+      label: Persona Match
+      type: bool
+      description: Whether the contact matches the target buyer persona
+      group: gtm_properties
+
+    - internal_name: buyer_persona
+      label: Buyer Persona
+      type: enumeration
+      options:
+        - label: Founder
+          value: founder
+        - label: CEO
+          value: ceo
+        - label: CRO
+          value: cro
+        - label: VP Sales
+          value: vp_sales
+        - label: RevOps
+          value: revops
+        - label: Marketing
+          value: marketing
+        - label: Operations
+          value: operations
+        - label: IT
+          value: it
+        - label: Other
+          value: other
+      group: gtm_properties
+
+    - internal_name: outreach_channel
+      label: Outreach Channel
+      type: enumeration
+      options:
+        - label: Email
+          value: email
+        - label: LinkedIn
+          value: linkedin
+        - label: Phone
+          value: phone
+        - label: Multi-Channel
+          value: multi_channel
+        - label: None
+          value: none
+      group: gtm_properties
+
+    - internal_name: sequence_status
+      label: Sequence Status
+      type: enumeration
+      options:
+        - label: Not Added
+          value: not_added
+        - label: Added
+          value: added
+        - label: Active
+          value: active
+        - label: Replied
+          value: replied
+        - label: Bounced
+          value: bounced
+        - label: Unsubscribed
+          value: unsubscribed
+        - label: Completed
+          value: completed
+      group: gtm_properties
+
+    - internal_name: contact_source
+      label: Contact Source
+      type: string
+      group: gtm_properties
+
+    - internal_name: linkedin_url
+      label: LinkedIn URL
+      type: string
+      group: gtm_properties
+
+  deals:
+    - internal_name: gtm_campaign_source
+      label: GTM Campaign Source
+      type: string
+      group: gtm_properties
+
+    - internal_name: scoring_snapshot
+      label: Scoring Snapshot
+      type: string
+      description: JSON snapshot of ICP score at deal creation
+      group: gtm_properties
+
+    - internal_name: original_icp_score
+      label: Original ICP Score
+      type: number
+      group: gtm_properties
+
+    - internal_name: outbound_motion
+      label: Outbound Motion
+      type: enumeration
+      options:
+        - label: Founder-Led
+          value: founder_led
+        - label: SDR-Led
+          value: sdr_led
+        - label: AE-Led
+          value: ae_led
+        - label: Partner-Led
+          value: partner_led
+        - label: Other
+          value: other
+      group: gtm_properties
+
+    - internal_name: meeting_source
+      label: Meeting Source
+      type: enumeration
+      options:
+        - label: Cold Email
+          value: cold_email
+        - label: LinkedIn
+          value: linkedin
+        - label: Referral
+          value: referral
+        - label: Event
+          value: event
+        - label: Website
+          value: website
+        - label: Other
+          value: other
+      group: gtm_properties
+
+pipeline:
+  name: GTM Outbound Pipeline
+  stages:
+    - label: Target Account Identified
+      probability: 0.10
+      display_order: 1
+    - label: Contact Validated
+      probability: 0.20
+      display_order: 2
+    - label: Outreach Started
+      probability: 0.30
+      display_order: 3
+    - label: Positive Reply
+      probability: 0.40
+      display_order: 4
+    - label: Meeting Booked
+      probability: 0.50
+      display_order: 5
+    - label: Qualified Opportunity
+      probability: 0.70
+      display_order: 6
+    - label: Proposal / Evaluation
+      probability: 0.80
+      display_order: 7
+    - label: Closed Won
+      probability: 1.00
+      display_order: 8
+    - label: Closed Lost
+      probability: 0.00
+      display_order: 9

@@ -1,0 +1,73 @@
+pipelines:
+  gtm_outbound:
+    name: GTM Outbound Pipeline
+    description: Default outbound GTM sales pipeline for scored accounts
+    stages:
+      - label: Target Account Identified
+        probability: 0.10
+        display_order: 1
+      - label: Contact Validated
+        probability: 0.20
+        display_order: 2
+      - label: Outreach Started
+        probability: 0.30
+        display_order: 3
+      - label: Positive Reply
+        probability: 0.40
+        display_order: 4
+      - label: Meeting Booked
+        probability: 0.50
+        display_order: 5
+      - label: Qualified Opportunity
+        probability: 0.70
+        display_order: 6
+      - label: Proposal / Evaluation
+        probability: 0.80
+        display_order: 7
+      - label: Closed Won
+        probability: 1.00
+        display_order: 8
+      - label: Closed Lost
+        probability: 0.00
+        display_order: 9
+
+  enterprise_outbound:
+    name: Enterprise GTM Pipeline
+    description: Extended pipeline for enterprise accounts with longer cycles
+    stages:
+      - label: Target Account Identified
+        probability: 0.05
+        display_order: 1
+      - label: Contact Validated
+        probability: 0.10
+        display_order: 2
+      - label: Outreach Started
+        probability: 0.20
+        display_order: 3
+      - label: Positive Reply
+        probability: 0.30
+        display_order: 4
+      - label: Meeting Booked
+        probability: 0.40
+        display_order: 5
+      - label: Discovery Call Completed
+        probability: 0.50
+        display_order: 6
+      - label: Qualified Opportunity
+        probability: 0.60
+        display_order: 7
+      - label: Technical Evaluation
+        probability: 0.70
+        display_order: 8
+      - label: Proposal Submitted
+        probability: 0.80
+        display_order: 9
+      - label: Negotiation
+        probability: 0.90
+        display_order: 10
+      - label: Closed Won
+        probability: 1.00
+        display_order: 11
+      - label: Closed Lost
+        probability: 0.00
+        display_order: 12

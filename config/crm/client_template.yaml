@@ -1,0 +1,34 @@
+client:
+  name: acme_saas
+  industry: B2B SaaS
+  crm: hubspot
+  region: US
+  primary_currency: USD
+
+gtm:
+  target_segments:
+    - B2B SaaS
+    - Healthcare SaaS
+  target_employee_range:
+    min: 50
+    max: 500
+  target_geographies:
+    - United States
+    - Canada
+  buyer_personas:
+    - CEO
+    - Founder
+    - VP Sales
+    - RevOps
+  excluded_industries:
+    - Education
+    - Government
+  lifecycle_model: default_outbound
+
+crm_setup:
+  create_custom_fields: true
+  create_pipeline: true
+  create_stages: true
+  create_lifecycle_status_fields: true
+  create_owner_assignment_placeholders: true
+  dry_run_default: true

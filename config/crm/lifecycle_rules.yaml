@@ -1,0 +1,95 @@
+lifecycle_rules:
+  # Rules are evaluated in order. First match wins per contact/account.
+  # These rules define GTM status fields — do not conflict with native CRM lifecycle stages.
+  # For native HubSpot/Salesforce lifecycle stage updates, configure CRM workflows manually.
+
+  gtm_status_rules:
+    - id: sales_ready
+      label: Sales Ready
+      description: Account is Tier 1 or Tier 2 and contact email is valid
+      conditions:
+        - field: icp_tier
+          operator: in
+          values: [Tier 1, Tier 2]
+        - field: email_validation_status
+          operator: equals
+          value: Valid
+      action:
+        field: gtm_status
+        value: Sales Ready
+
+    - id: mql_high_score
+      label: MQL (High Score + Persona Match)
+      description: High ICP score with confirmed persona match
+      conditions:
+        - field: icp_score
+          operator: gte
+          value: 80
+        - field: persona_match
+          operator: equals
+          value: true
+      action:
+        field: lifecycle_stage
+        value: MQL
+        note: >
+          For HubSpot: set via workflow on gtm_status = Sales Ready.
+          For Salesforce: set via Process Builder or Flow. Do not update native stage directly.
+
+    - id: sql_positive_reply
+      label: SQL (Positive Reply)
+      description: Contact has replied positively to outreach
+      conditions:
+        - field: sequence_status
+          operator: equals
+          value: Replied
+      action:
+        field: lifecycle_stage
+        value: SQL
+
+    - id: opportunity_meeting_booked
+      label: Opportunity (Meeting Booked)
+      description: Meeting has been booked — trigger Deal/Opportunity creation
+      conditions:
+        - field: sequence_status
+          operator: equals
+          value: Replied
+        - field: meeting_booked
+          operator: equals
+          value: true
+      action:
+        field: lifecycle_stage
+        value: Opportunity
+        crm_action: create_or_update_deal
+
+    - id: customer_closed_won
+      label: Customer (Closed Won)
+      description: Deal is closed won
+      conditions:
+        - field: deal_stage
+          operator: equals
+          value: Closed Won
+      action:
+        field: lifecycle_stage
+        value: Customer
+
+  # Suppression rules — contacts/accounts that should be removed from sequences
+  suppression_rules:
+    - id: suppress_invalid_email
+      label: Suppress Invalid Email
+      conditions:
+        - field: email_validation_status
+          operator: in
+          values: [Invalid, Bounced]
+      action:
+        field: sequence_status
+        value: Unsubscribed
+
+    - id: suppress_disqualified_account
+      label: Suppress Disqualified Account
+      conditions:
+        - field: icp_tier
+          operator: equals
+          value: Rejected
+      action:
+        field: gtm_status
+        value: Disqualified

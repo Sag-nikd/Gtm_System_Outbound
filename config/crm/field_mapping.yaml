@@ -1,0 +1,86 @@
+# Maps generic GTM field names to CRM-specific internal names
+# Used by the setup generator to translate between CRM platforms
+
+field_mapping:
+  company:
+    icp_score:
+      hubspot: icp_score
+      salesforce: ICP_Score__c
+    icp_tier:
+      hubspot: icp_tier
+      salesforce: ICP_Tier__c
+    account_source:
+      hubspot: account_source
+      salesforce: Account_Source_GTM__c
+    enrichment_status:
+      hubspot: enrichment_status
+      salesforce: Enrichment_Status__c
+    fit_reason:
+      hubspot: fit_reason
+      salesforce: Fit_Reason__c
+    gtm_segment:
+      hubspot: gtm_segment
+      salesforce: GTM_Segment__c
+    target_market:
+      hubspot: target_market
+      salesforce: Target_Market__c
+    last_scored_date:
+      hubspot: last_scored_date
+      salesforce: Last_Scored_Date__c
+
+  contact:
+    email_validation_status:
+      hubspot: email_validation_status
+      salesforce: Email_Validation_Status__c
+    persona_match:
+      hubspot: persona_match
+      salesforce: Persona_Match__c
+    buyer_persona:
+      hubspot: buyer_persona
+      salesforce: Buyer_Persona__c
+    outreach_channel:
+      hubspot: outreach_channel
+      salesforce: Outreach_Channel__c
+    sequence_status:
+      hubspot: sequence_status
+      salesforce: Sequence_Status__c
+    contact_source:
+      hubspot: contact_source
+      salesforce: Contact_Source_GTM__c
+    linkedin_url:
+      hubspot: linkedin_url
+      salesforce: LinkedIn_URL__c
+
+  deal:
+    gtm_campaign_source:
+      hubspot: gtm_campaign_source
+      salesforce: GTM_Campaign_Source__c
+    scoring_snapshot:
+      hubspot: scoring_snapshot
+      salesforce: Scoring_Snapshot__c
+    original_icp_score:
+      hubspot: original_icp_score
+      salesforce: Original_ICP_Score__c
+    outbound_motion:
+      hubspot: outbound_motion
+      salesforce: Outbound_Motion__c
+    meeting_source:
+      hubspot: meeting_source
+      salesforce: Meeting_Source__c
+
+type_mapping:
+  # Maps generic field types to HubSpot property types
+  hubspot:
+    string: text
+    number: number
+    enumeration: enumeration
+    bool: booleancheckbox
+    date: date
+
+  # Maps generic field types to Salesforce field types
+  salesforce:
+    string: Text
+    number: Number
+    enumeration: Picklist
+    bool: Checkbox
+    date: Date
