@@ -52,6 +52,8 @@ class HubSpotSetupProvider(CRMProvider):
         )
         self._existing_props: Dict[str, List[Dict[str, Any]]] = {}
         self._existing_pipelines: List[Dict[str, Any]] = []
+        # Stages embedded in pipeline creation response — label -> id
+        self._created_stage_ids: Dict[str, str] = {}
 
     # ── Authentication ────────────────────────────────────────────────────────
 
@@ -69,6 +71,27 @@ class HubSpotSetupProvider(CRMProvider):
         self._client = HubSpotClient(_TOKEN)
         log.info("HubSpot: authenticated with private app token")
         return True
+
+    # ── Property group ────────────────────────────────────────────────────────
+
+    def _ensure_property_group(self, object_name: str) -> None:
+        """Create the gtm_properties group for the object if it doesn't already exist."""
+        try:
+            existing = self._client.get_property_groups(object_name)
+            if any(g.get("name") == "gtm_properties" for g in existing):
+                log.info("[%s] Property group 'gtm_properties' already exists", object_name)
+                return
+            self._client.create_property_group(object_name, {
+                "name": "gtm_properties",
+                "label": "GTM Properties",
+                "displayOrder": -1,
+            })
+            log.info("[%s] Created property group: gtm_properties", object_name)
+        except Exception as exc:
+            log.warning(
+                "[%s] Could not ensure property group, properties will use default group: %s",
+                object_name, exc,
+            )
 
     # ── Fetch existing state ──────────────────────────────────────────────────
 
@@ -105,6 +128,10 @@ class HubSpotSetupProvider(CRMProvider):
                 field_type=field_type,
                 status=FieldStatus.PLANNED,
             )
+
+        # Ensure the GTM property group exists before first property in each object
+        if object_name not in self._existing_props:
+            self._ensure_property_group(object_name)
 
         existing = self.get_existing_fields(object_name)
 
@@ -186,19 +213,67 @@ class HubSpotSetupProvider(CRMProvider):
             result = self._client.create_pipeline("deals", payload)
             pid = result.get("id")
             log.info("Created pipeline: %s (id=%s)", pipeline_name, pid)
-            self._existing_pipelines = []  # invalidate cache
+            for stage in result.get("stages", []):
+                self._created_stage_ids[stage.get("label", "")] = stage.get("id", "")
+            self._existing_pipelines = []
             return PipelineResult(
                 pipeline_name=pipeline_name,
                 status=FieldStatus.CREATED,
                 pipeline_id=pid,
             )
         except Exception as exc:
+            # Check if this is a pipeline limit error (free plan = 1 pipeline max)
+            is_limit = False
+            try:
+                import requests as _req
+                if isinstance(exc, _req.HTTPError) and exc.response is not None:
+                    body = exc.response.json()
+                    is_limit = body.get("category") == "API_LIMIT" or "limit" in body.get("message", "").lower()
+            except Exception:
+                pass
+            if is_limit:
+                log.info("Pipeline limit reached — adopting existing pipeline")
+                return self._adopt_existing_pipeline(pipeline_name)
             log.error("Failed to create pipeline '%s': %s", pipeline_name, exc)
             return PipelineResult(
                 pipeline_name=pipeline_name,
                 status=FieldStatus.FAILED,
                 note=str(exc),
             )
+
+    def _adopt_existing_pipeline(self, desired_name: str) -> PipelineResult:
+        """Rename the first existing pipeline to the desired name and reuse it."""
+        existing = self.get_existing_pipelines()
+        if not existing:
+            return PipelineResult(
+                pipeline_name=desired_name,
+                status=FieldStatus.FAILED,
+                note="Pipeline limit reached and no existing pipeline found to adopt.",
+            )
+        first = existing[0]
+        pid = first.get("id", "")
+        current_label = first.get("label", "")
+        if current_label != desired_name:
+            try:
+                self._client.rename_pipeline("deals", pid, desired_name)
+                log.info(
+                    "Renamed existing pipeline '%s' to '%s' (id=%s)",
+                    current_label, desired_name, pid,
+                )
+            except Exception as exc:
+                log.warning("Could not rename pipeline: %s — using as-is", exc)
+        else:
+            log.info("Existing pipeline already named '%s' — reusing (id=%s)", desired_name, pid)
+        # Cache existing stage IDs so create_stage() can detect them
+        for stage in first.get("stages", []):
+            self._created_stage_ids[stage.get("label", "")] = stage.get("id", "")
+        self._existing_pipelines = []
+        return PipelineResult(
+            pipeline_name=desired_name,
+            status=FieldStatus.CREATED,
+            pipeline_id=pid,
+            note="Reused and renamed existing pipeline (plan limit: 1 pipeline).",
+        )
 
     def create_stage(self, pipeline_id: str, stage_config: Dict[str, Any]) -> StageResult:
         label = stage_config["label"]
@@ -212,6 +287,18 @@ class HubSpotSetupProvider(CRMProvider):
                 stage_label=label,
                 probability=probability,
                 status=FieldStatus.PLANNED,
+            )
+
+        # If stage was already created as part of pipeline creation payload
+        if label in self._created_stage_ids:
+            sid = self._created_stage_ids[label]
+            log.info("Stage '%s' created with pipeline (id=%s)", label, sid)
+            return StageResult(
+                pipeline_name=pipeline_name,
+                stage_label=label,
+                probability=probability,
+                status=FieldStatus.CREATED,
+                stage_id=sid,
             )
 
         # Find the full pipeline object for stage inspection

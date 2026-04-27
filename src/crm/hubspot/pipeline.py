@@ -4,22 +4,29 @@ from typing import Any, Dict, List, Optional
 
 
 def build_pipeline_payload(pipeline_config: Dict[str, Any]) -> Dict[str, Any]:
-    """Build a HubSpot pipeline creation payload (without stages — added separately)."""
+    """Build a HubSpot pipeline creation payload with stages included.
+    HubSpot v3 pipelines API requires at least one stage in the creation body."""
+    stages = [build_stage_payload(s) for s in pipeline_config.get("stages", [])]
     return {
         "label": pipeline_config["name"],
         "displayOrder": pipeline_config.get("display_order", 0),
+        "stages": stages,
     }
 
 
 def build_stage_payload(stage_config: Dict[str, Any]) -> Dict[str, Any]:
-    """Build a HubSpot pipeline stage creation payload."""
+    """Build a HubSpot pipeline stage creation payload.
+    Note: isClosed is a read-only derived field — must not be sent in creation payloads."""
     probability = stage_config.get("probability", 0.0)
+    # HubSpot expects probability as a plain number string e.g. "0.5" not "0.50"
+    prob_str = str(round(float(probability), 4)).rstrip("0").rstrip(".")
+    if "." not in prob_str:
+        prob_str = prob_str  # integer like "0" or "1" is fine
     return {
         "label": stage_config["label"],
         "displayOrder": stage_config.get("display_order", 0),
         "metadata": {
-            "probability": str(probability),
-            "isClosed": str(probability in (0.0, 1.0)).lower(),
+            "probability": prob_str,
         },
     }
 

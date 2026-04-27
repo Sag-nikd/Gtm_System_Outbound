@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from src.crm.base import CRMProvider, FieldStatus, SetupMode, SetupReport
+from src.crm.base import CRMProvider, FieldStatus, SetupMode, SetupReport, StageResult
 from src.crm.config_loader import resolve_setup_config
 from src.crm.reporting import write_all_reports
 from src.utils.logger import get_logger
@@ -120,7 +120,19 @@ class CRMSetupGenerator:
         pipeline_result = self.provider.create_pipeline(pipeline_cfg)
         report.pipelines.append(pipeline_result)
 
-        pipeline_id = pipeline_result.pipeline_id or pipeline_cfg.get("name", "")
+        if pipeline_result.status == FieldStatus.FAILED:
+            log.warning("Skipping stage creation — pipeline creation failed")
+            for stage in pipeline_cfg.get("stages", []):
+                report.stages.append(StageResult(
+                    pipeline_name=pipeline_cfg.get("name", ""),
+                    stage_label=stage.get("label", stage.get("name", "")),
+                    probability=stage.get("probability", 0.0),
+                    status=FieldStatus.FAILED,
+                    note="Skipped because pipeline creation failed",
+                ))
+            return
+
+        pipeline_id = pipeline_result.pipeline_id or ""
         for stage in pipeline_cfg.get("stages", []):
             stage_result = self.provider.create_stage(pipeline_id, stage)
             report.stages.append(stage_result)

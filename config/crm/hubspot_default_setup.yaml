@@ -168,8 +168,8 @@ custom_fields:
       type: string
       group: gtm_properties
 
-    - internal_name: linkedin_url
-      label: LinkedIn URL
+    - internal_name: gtm_linkedin_url
+      label: LinkedIn URL (GTM)
       type: string
       group: gtm_properties
 

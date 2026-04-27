@@ -40,6 +40,11 @@ class HubSpotClient:
     def _post(self, path: str, payload: Dict[str, Any]) -> Dict[str, Any]:
         url = f"{_BASE_URL}{path}"
         resp = requests.post(url, headers=self._headers, json=payload, timeout=15)
+        if not resp.ok:
+            try:
+                log.debug("HubSpot API error body: %s", resp.json())
+            except Exception:
+                log.debug("HubSpot API error body (raw): %s", resp.text[:500])
         resp.raise_for_status()
         return resp.json()
 
@@ -60,6 +65,17 @@ class HubSpotClient:
     @api_retry
     def create_pipeline(self, object_name: str, payload: Dict[str, Any]) -> Dict[str, Any]:
         return self._post(f"/crm/v3/pipelines/{object_name}", payload)
+
+    @api_retry
+    def rename_pipeline(
+        self, object_name: str, pipeline_id: str, new_label: str
+    ) -> Dict[str, Any]:
+        url = f"{_BASE_URL}/crm/v3/pipelines/{object_name}/{pipeline_id}"
+        resp = requests.patch(
+            url, headers=self._headers, json={"label": new_label}, timeout=15
+        )
+        resp.raise_for_status()
+        return resp.json()
 
     @api_retry
     def create_pipeline_stage(

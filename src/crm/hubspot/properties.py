@@ -6,21 +6,27 @@ from src.utils.logger import get_logger
 
 log = get_logger(__name__)
 
-# HubSpot type mapping from generic config types
+# Maps generic config type to HubSpot property `type` value
+# Valid HubSpot types: string, number, date, datetime, enumeration, booleancheckbox
+# Maps generic config type -> HubSpot `type` (data type in API)
+# Valid HubSpot types: string, number, date, datetime, enumeration, bool
 _TYPE_MAP: Dict[str, str] = {
-    "string": "text",
+    "string": "string",
+    "text": "string",
     "number": "number",
     "enumeration": "enumeration",
-    "bool": "booleancheckbox",
+    "bool": "bool",
+    "boolean": "bool",
     "date": "date",
-    "text": "text",
+    "url": "string",
 }
 
+# Maps HubSpot `type` -> `fieldType` (UI widget type in API)
 _FIELD_TYPE_MAP: Dict[str, str] = {
-    "text": "text",
+    "string": "text",
     "number": "number",
     "enumeration": "select",
-    "booleancheckbox": "booleancheckbox",
+    "bool": "booleancheckbox",
     "date": "date",
 }
 
@@ -89,9 +95,9 @@ def field_has_type_conflict(
     existing_properties: List[Dict[str, Any]],
 ) -> bool:
     """Return True if the field exists but has a different HubSpot type."""
+    mapped = _TYPE_MAP.get(required_type, required_type)
     for p in existing_properties:
         if p.get("name") == internal_name:
             existing_type = p.get("type", "")
-            mapped = _TYPE_MAP.get(required_type, required_type)
             return existing_type != mapped
     return False

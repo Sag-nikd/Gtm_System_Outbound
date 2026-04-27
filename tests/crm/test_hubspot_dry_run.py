@@ -123,7 +123,8 @@ def test_build_property_payload_bool():
         "label": "Persona Match",
         "type": "bool",
     })
-    assert payload["type"] == "booleancheckbox"
+    assert payload["type"] == "bool"          # HubSpot data type
+    assert payload["fieldType"] == "booleancheckbox"  # HubSpot UI widget
 
 
 # ── Field existence checks ────────────────────────────────────────────────────
