@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from src.crm.base import CRMProvider, FieldStatus, SetupMode, SetupReport, StageResult
@@ -81,7 +81,7 @@ class CRMSetupGenerator:
             client_name=self.client_name,
             crm_type=self.crm,
             mode=self.mode.value,
-            timestamp=datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            timestamp=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         )
 
         if self.mode == SetupMode.INSPECT_ONLY:

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List
 
 from src.crm.base import (
@@ -195,7 +195,7 @@ class SalesforceSetupProvider(CRMProvider):
             client_name=self.client_name,
             crm_type="salesforce",
             mode=self.mode.value,
-            timestamp=datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            timestamp=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         )
         # Without live API access, all fields are "planned" (missing)
         for object_name, fields in required_config.get("custom_fields", {}).items():
@@ -234,5 +234,5 @@ class SalesforceSetupProvider(CRMProvider):
             client_name=self.client_name,
             crm_type="salesforce",
             mode=self.mode.value,
-            timestamp=datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            timestamp=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         )

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from src.crm.base import (
@@ -48,7 +48,7 @@ class HubSpotSetupProvider(CRMProvider):
             client_name=client_name,
             crm_type="hubspot",
             mode=mode.value,
-            timestamp=datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            timestamp=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         )
         self._existing_props: Dict[str, List[Dict[str, Any]]] = {}
         self._existing_pipelines: List[Dict[str, Any]] = []
@@ -357,7 +357,7 @@ class HubSpotSetupProvider(CRMProvider):
             client_name=self.client_name,
             crm_type="hubspot",
             mode=self.mode.value,
-            timestamp=datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            timestamp=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         )
 
         for object_name, fields in required_config.get("custom_fields", {}).items():
