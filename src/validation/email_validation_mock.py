@@ -7,10 +7,30 @@ Email validation mock module — simulates ZeroBounce and NeverBounce two-step v
 from __future__ import annotations
 import json
 
+from pydantic import ValidationError
+
+from src.schemas.contact import Contact
+from src.utils.logger import get_logger
+
+log = get_logger(__name__)
+
 
 def load_contacts(file_path: str) -> list[dict]:
     with open(file_path, "r", encoding="utf-8") as f:
-        return json.load(f)
+        raw = json.load(f)
+
+    contacts = []
+    for record in raw:
+        try:
+            Contact(**record)
+        except ValidationError as exc:
+            log.warning(
+                "Skipping contact %s: schema validation failed — %s",
+                record.get("contact_id", "?"), exc.error_count()
+            )
+            continue
+        contacts.append(record)
+    return contacts
 
 
 def filter_contacts_for_approved_accounts(

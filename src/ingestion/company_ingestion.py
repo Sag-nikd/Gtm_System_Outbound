@@ -7,6 +7,12 @@ from __future__ import annotations
 import json
 from urllib.parse import urlparse
 
+from pydantic import ValidationError
+
+from src.schemas.company import Company
+from src.utils.logger import get_logger
+
+log = get_logger(__name__)
 
 REQUIRED_FIELDS = [
     "company_id", "company_name", "website", "industry",
@@ -43,8 +49,17 @@ def load_companies(file_path: str) -> list[dict]:
     for record in raw:
         missing = [field for field in REQUIRED_FIELDS if field not in record]
         if missing:
-            print(f"  [WARN] Skipping {record.get('company_id', '?')}: missing fields {missing}")
+            log.warning("Skipping %s: missing fields %s", record.get("company_id", "?"), missing)
             continue
-        companies.append(_normalize_company(record))
+        normalized = _normalize_company(record)
+        try:
+            Company(**normalized)
+        except ValidationError as exc:
+            log.warning(
+                "Skipping %s: schema validation failed — %s",
+                normalized.get("company_id", "?"), exc.error_count()
+            )
+            continue
+        companies.append(normalized)
 
     return companies
