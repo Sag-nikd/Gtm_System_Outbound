@@ -5,42 +5,49 @@ HubSpot sync mock module — builds CRM-ready company and contact records.
 
 from __future__ import annotations
 import json
+import os
 
-_LIFECYCLE_MAP: dict | None = None
+_LIFECYCLE_MAP: dict = None
+_LIFECYCLE_CONFIG_PATH: str = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    "config", "lifecycle_mapping.json",
+)
 
 
-def _load_lifecycle_map(file_path: str = "config/lifecycle_mapping.json") -> dict:
+def _load_lifecycle_map(file_path: str = None) -> dict:
     global _LIFECYCLE_MAP
     if _LIFECYCLE_MAP is None:
-        with open(file_path, "r", encoding="utf-8") as f:
+        path = file_path or _LIFECYCLE_CONFIG_PATH
+        with open(path, "r", encoding="utf-8") as f:
             _LIFECYCLE_MAP = json.load(f)
     return _LIFECYCLE_MAP
 
 
 def _company_lifecycle(company: dict) -> str:
+    cfg = _load_lifecycle_map()
+    rules = cfg.get("company_lifecycle_rules", {})
+
     tier = company.get("icp_tier", "Disqualified")
     approved = company.get("contact_discovery_approved", False)
 
     if tier == "Tier 1" and approved:
-        return "Contact Discovery Approved"
+        return rules.get("tier_1_enriched", "Contact Discovery Approved")
     if tier == "Tier 2" and approved:
-        return "Contact Discovery Approved"
+        return rules.get("tier_2_enriched", "Contact Discovery Approved")
     if tier == "Tier 3":
-        return "Enriched Account"
-    return "Suppressed"
+        return rules.get("tier_3_enriched", "Enriched Account")
+    return rules.get("disqualified", "Suppressed")
 
 
 def _contact_lifecycle(contact: dict) -> str:
+    cfg = _load_lifecycle_map()
+    rules = cfg.get("contact_lifecycle_rules", {})
+
     status = contact.get("final_validation_status", "suppressed")
-    mapping = {
-        "approved": "Contact Validated",
-        "review": "Nurture",
-        "suppressed": "Suppressed",
-    }
-    return mapping.get(status, "Suppressed")
+    return rules.get(status, "Suppressed")
 
 
-def create_hubspot_company_records(companies: list[dict]) -> list[dict]:
+def create_hubspot_company_records(companies: list) -> list:
     records = []
     for c in companies:
         records.append({
@@ -61,9 +68,7 @@ def create_hubspot_company_records(companies: list[dict]) -> list[dict]:
     return records
 
 
-def create_hubspot_contact_records(
-    contacts: list[dict], companies: list[dict]
-) -> list[dict]:
+def create_hubspot_contact_records(contacts: list, companies: list) -> list:
     company_tier = {c["company_id"]: c.get("icp_tier", "") for c in companies}
     company_name_map = {c["company_id"]: c.get("company_name", "") for c in companies}
 
