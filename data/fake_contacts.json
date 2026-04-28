@@ -118,5 +118,85 @@
     "email": "natalie.brooks@riversideregional.org",
     "linkedin_url": "https://linkedin.com/in/natalie-brooks-c006",
     "persona_type": "VP Population Health"
+  },
+  {
+    "contact_id": "K013",
+    "company_id": "C009",
+    "first_name": "Gregory",
+    "last_name": "Osei",
+    "title": "VP Member Engagement",
+    "email": "gregory.osei@alliantmanagedcare.com",
+    "linkedin_url": "https://linkedin.com/in/gregory-osei-c009",
+    "persona_type": "VP Member Engagement"
+  },
+  {
+    "contact_id": "K014",
+    "company_id": "C015",
+    "first_name": "Patricia",
+    "last_name": "Holloway",
+    "title": "Director Medicaid Operations",
+    "email": "patricia.holloway@highmarkblueshieldhealth.com",
+    "linkedin_url": "https://linkedin.com/in/patricia-holloway-c015",
+    "persona_type": "Director Medicaid Operations"
+  },
+  {
+    "contact_id": "K015",
+    "company_id": "C012",
+    "first_name": "Vincent",
+    "last_name": "Tran",
+    "title": "Chief Digital Officer",
+    "email": "vincent.tran@innovexconnectedhealth.com",
+    "linkedin_url": "https://linkedin.com/in/vincent-tran-c012",
+    "persona_type": "Chief Digital Officer"
+  },
+  {
+    "contact_id": "K016",
+    "company_id": "C001",
+    "first_name": "EmptyEmail",
+    "last_name": "EdgeCase",
+    "title": "Director Member Services",
+    "email": "",
+    "linkedin_url": "https://linkedin.com/in/emptyemail-edge-c001",
+    "persona_type": "Director Member Services"
+  },
+  {
+    "contact_id": "K017",
+    "company_id": "C002",
+    "first_name": "DuplicateEmail",
+    "last_name": "EdgeCase",
+    "title": "VP Member Engagement",
+    "email": "angela.morrison@centenehealthpartners.com",
+    "linkedin_url": "https://linkedin.com/in/duplicate-edge-c002",
+    "persona_type": "VP Member Engagement"
+  },
+  {
+    "contact_id": "K018",
+    "company_id": "C003",
+    "first_name": "Xavier",
+    "last_name": "Nguyen",
+    "title": "Chief Revenue Officer",
+    "email": "xavier.nguyen@meridiancaresolutions.com",
+    "linkedin_url": "https://linkedin.com/in/xavier-nguyen-c003",
+    "persona_type": "Chief Revenue Officer"
+  },
+  {
+    "contact_id": "K019",
+    "company_id": "C004",
+    "first_name": "Sofía",
+    "last_name": "García-Martínez",
+    "title": "VP Member Engagement",
+    "email": "sofia.garcia@elevancecommunity.com",
+    "linkedin_url": "https://linkedin.com/in/sofia-garcia-c004",
+    "persona_type": "VP Member Engagement"
+  },
+  {
+    "contact_id": "K020",
+    "company_id": "C999",
+    "first_name": "Orphan",
+    "last_name": "Contact",
+    "title": "Director Member Services",
+    "email": "orphan.contact@unknowncompany.com",
+    "linkedin_url": "https://linkedin.com/in/orphan-contact",
+    "persona_type": "Director Member Services"
   }
 ]

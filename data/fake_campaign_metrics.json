@@ -46,5 +46,41 @@
     "spam_rate": 0.001,
     "meetings_booked": 3,
     "domain_health_score": 92
+  },
+  {
+    "campaign_name": "Zero-Send Campaign - Warmup Test",
+    "emails_sent": 0,
+    "open_rate": 0.0,
+    "reply_rate": 0.0,
+    "positive_reply_rate": 0.0,
+    "bounce_rate": 0.0,
+    "unsubscribe_rate": 0.0,
+    "spam_rate": 0.0,
+    "meetings_booked": 0,
+    "domain_health_score": 75
+  },
+  {
+    "campaign_name": "All-Zero Metrics - Edge Case Campaign",
+    "emails_sent": 0,
+    "open_rate": 0.0,
+    "reply_rate": 0.0,
+    "positive_reply_rate": 0.0,
+    "bounce_rate": 0.0,
+    "unsubscribe_rate": 0.0,
+    "spam_rate": 0.0,
+    "meetings_booked": 0,
+    "domain_health_score": 0
+  },
+  {
+    "campaign_name": "Provider Outreach Wave 2 - Domain Recovery",
+    "emails_sent": 145,
+    "open_rate": 0.18,
+    "reply_rate": 0.01,
+    "positive_reply_rate": 0.005,
+    "bounce_rate": 0.08,
+    "unsubscribe_rate": 0.02,
+    "spam_rate": 0.008,
+    "meetings_booked": 0,
+    "domain_health_score": 0
   }
 ]
