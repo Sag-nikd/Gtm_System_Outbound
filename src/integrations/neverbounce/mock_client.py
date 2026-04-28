@@ -2,12 +2,13 @@ from __future__ import annotations
 
 from typing import List
 
+from src.integrations.neverbounce.base import NeverBounceBase
 from src.utils.logger import get_logger
 
 log = get_logger(__name__)
 
 
-class NeverBounceMockClient:
+class NeverBounceMockClient(NeverBounceBase):
     """
     NeverBounce mock client — pass-through in mock mode.
     The ZeroBounce mock already populates both zerobounce_* and neverbounce_* fields

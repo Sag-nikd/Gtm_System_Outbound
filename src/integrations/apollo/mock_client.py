@@ -3,13 +3,14 @@ from __future__ import annotations
 from typing import List
 
 from src.ingestion.company_ingestion import load_companies
+from src.integrations.apollo.base import ApolloBase
 from src.validation.email_validation_mock import load_contacts
 from src.utils.logger import get_logger
 
 log = get_logger(__name__)
 
 
-class ApolloMockClient:
+class ApolloMockClient(ApolloBase):
     """
     Apollo mock client — reads from local JSON data files.
     Future: replace with Apollo API (firmographic + contact search).

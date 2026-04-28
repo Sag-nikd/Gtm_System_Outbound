@@ -6,12 +6,13 @@ from src.hubspot.hubspot_sync_mock import (
     create_hubspot_company_records,
     create_hubspot_contact_records,
 )
+from src.integrations.hubspot.base import HubSpotBase
 from src.utils.logger import get_logger
 
 log = get_logger(__name__)
 
 
-class HubSpotMockClient:
+class HubSpotMockClient(HubSpotBase):
     """
     HubSpot mock client — builds CRM-ready records as CSV-exportable dicts.
     Future: replace with HubSpot Private App API upsert calls.

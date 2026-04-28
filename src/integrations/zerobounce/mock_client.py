@@ -2,13 +2,14 @@ from __future__ import annotations
 
 from typing import List
 
+from src.integrations.zerobounce.base import ZeroBounceBase
 from src.validation.email_validation_mock import validate_contacts
 from src.utils.logger import get_logger
 
 log = get_logger(__name__)
 
 
-class ZeroBounceMockClient:
+class ZeroBounceMockClient(ZeroBounceBase):
     """
     ZeroBounce mock client — simulates email deliverability validation locally.
     Also populates NeverBounce fields in one pass (mock architecture limitation).

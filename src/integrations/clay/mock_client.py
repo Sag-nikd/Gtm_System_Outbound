@@ -3,12 +3,13 @@ from __future__ import annotations
 from typing import List
 
 from src.enrichment.clay_mock_enrichment import enrich_accounts
+from src.integrations.clay.base import ClayBase
 from src.utils.logger import get_logger
 
 log = get_logger(__name__)
 
 
-class ClayMockClient:
+class ClayMockClient(ClayBase):
     """
     Clay mock client — applies persona mapping and signal enrichment locally.
     Future: replace with Clay enrichment workflows and waterfall enrichment API.

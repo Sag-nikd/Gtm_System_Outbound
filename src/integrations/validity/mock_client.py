@@ -2,13 +2,14 @@ from __future__ import annotations
 
 from typing import List
 
+from src.integrations.validity.base import ValidityBase
 from src.monitoring.campaign_health import load_campaign_metrics
 from src.utils.logger import get_logger
 
 log = get_logger(__name__)
 
 
-class ValidityMockClient:
+class ValidityMockClient(ValidityBase):
     """
     Validity mock client — reads campaign metrics from a local JSON file.
     Future: replace with Validity API and live sequencing platform data.
