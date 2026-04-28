@@ -32,5 +32,27 @@ class Settings:
             else os.path.join(self.BASE_DIR, _output_env)
         )
 
+        self.LOG_FORMAT: str = os.getenv("LOG_FORMAT", "text")
+
+        self._validate()
+
+    _REQUIRED_LIVE_KEYS = [
+        "APOLLO_API_KEY",
+        "CLAY_API_KEY",
+        "HUBSPOT_PRIVATE_APP_TOKEN",
+        "ZEROBOUNCE_API_KEY",
+        "NEVERBOUNCE_API_KEY",
+        "VALIDITY_API_KEY",
+    ]
+
+    def _validate(self) -> None:
+        if self.MOCK_MODE:
+            return
+        missing = [k for k in self._REQUIRED_LIVE_KEYS if not getattr(self, k)]
+        if missing:
+            raise EnvironmentError(
+                f"Missing required keys for live mode: {', '.join(missing)}"
+            )
+
 
 settings = Settings()
