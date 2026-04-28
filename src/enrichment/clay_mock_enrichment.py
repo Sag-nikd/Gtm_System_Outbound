@@ -47,21 +47,29 @@ def _get_enriched_signal_summary(company: dict) -> str:
     return "; ".join(signals) if signals else "no strong signals"
 
 
-def enrich_accounts(companies: list[dict]) -> list[dict]:
+def enrich_accounts(companies: list) -> list:
+    from src.utils.logger import get_logger
+    log = get_logger(__name__)
     enriched = []
+    failures = 0
     for company in companies:
-        industry = company.get("industry", "")
-        tier = company.get("icp_tier", "Disqualified")
-        approved = tier in APPROVED_TIERS
+        try:
+            industry = company.get("industry", "")
+            tier = company.get("icp_tier", "Disqualified")
+            approved = tier in APPROVED_TIERS
 
-        personas = PERSONA_MAP.get(industry, DEFAULT_PERSONAS)
+            personas = PERSONA_MAP.get(industry, DEFAULT_PERSONAS)
 
-        company["enrichment_status"] = "enriched"
-        company["enrichment_source"] = "clay_mock"   # Future: Clay
-        company["recommended_personas"] = ", ".join(personas)
-        company["enriched_signal_summary"] = _get_enriched_signal_summary(company)
-        company["contact_discovery_approved"] = approved
+            company["enrichment_status"] = "enriched"
+            company["enrichment_source"] = "clay_mock"
+            company["recommended_personas"] = ", ".join(personas)
+            company["enriched_signal_summary"] = _get_enriched_signal_summary(company)
+            company["contact_discovery_approved"] = approved
 
-        enriched.append(company)
-
+            enriched.append(company)
+        except Exception as exc:
+            failures += 1
+            cid = company.get("company_id", "?") if isinstance(company, dict) else "?"
+            log.warning("Enrichment failed for %s: %s", cid, exc)
+    log.info("Enriched %d/%d companies, %d failures", len(enriched), len(companies), failures)
     return enriched

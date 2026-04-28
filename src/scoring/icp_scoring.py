@@ -131,5 +131,17 @@ def score_company(company: dict, rules: dict) -> dict:
     return company
 
 
-def score_companies(companies: list[dict], rules: dict) -> list[dict]:
-    return [score_company(c, rules) for c in companies]
+def score_companies(companies: list, rules: dict) -> list:
+    from src.utils.logger import get_logger
+    log = get_logger(__name__)
+    results = []
+    failures = 0
+    for company in companies:
+        try:
+            results.append(score_company(company, rules))
+        except Exception as exc:
+            failures += 1
+            cid = company.get("company_id", "?") if isinstance(company, dict) else "?"
+            log.warning("Scoring failed for %s: %s", cid, exc)
+    log.info("Scored %d/%d companies, %d failures", len(results), len(companies), failures)
+    return results
