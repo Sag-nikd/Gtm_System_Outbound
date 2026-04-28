@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 import sys
+import uuid
+from datetime import datetime, timezone
 from typing import List, Tuple
 
 import pandas as pd
@@ -277,11 +281,29 @@ def run_campaign_monitoring(validity) -> None:
 
 # ── Orchestrator ──────────────────────────────────────────────────────────────
 
+def _config_hash() -> str:
+    path = os.path.join(settings.CONFIG_DIR, "icp_rules.json")
+    try:
+        with open(path, "rb") as f:
+            return hashlib.md5(f.read()).hexdigest()
+    except Exception:
+        return ""
+
+
+def _stage_entry(name: str, record_count: int, status: str = "completed") -> dict:
+    return {"name": name, "record_count": record_count, "status": status}
+
+
 def main() -> None:
     log.info("GTM pipeline starting — MOCK_MODE=%s", settings.MOCK_MODE)
+    started_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    run_id = str(uuid.uuid4())
+    stages = []
+
     apollo, clay, hubspot, zerobounce, neverbounce, validity = _get_clients()
 
     enriched = run_company_pipeline(apollo, clay)
+    stages.append(_stage_entry("company_pipeline", len(enriched)))
 
     approved_companies = [c for c in enriched if c.get("contact_discovery_approved")]
     if not approved_companies:
@@ -289,9 +311,14 @@ def main() -> None:
             "Circuit breaker: no approved companies — skipping contact pipeline and activation"
         )
         run_campaign_monitoring(validity)
+        stages.append(_stage_entry("contact_pipeline", 0, "skipped"))
+        stages.append(_stage_entry("activation_pipeline", 0, "skipped"))
+        stages.append(_stage_entry("campaign_monitoring", 0, "completed"))
+        _write_manifest(run_id, started_at, stages)
         return
 
     validated = run_contact_pipeline(enriched, apollo, zerobounce, neverbounce)
+    stages.append(_stage_entry("contact_pipeline", len(validated)))
 
     approved_contacts = [
         c for c in validated if c.get("final_validation_status") == "approved"
@@ -301,12 +328,34 @@ def main() -> None:
             "Circuit breaker: no approved contacts — skipping activation pipeline"
         )
         run_campaign_monitoring(validity)
+        stages.append(_stage_entry("activation_pipeline", 0, "skipped"))
+        stages.append(_stage_entry("campaign_monitoring", 0, "completed"))
+        _write_manifest(run_id, started_at, stages)
         return
 
     run_activation_pipeline(validated, enriched, hubspot)
+    stages.append(_stage_entry("activation_pipeline", len(approved_contacts)))
     run_campaign_monitoring(validity)
+    stages.append(_stage_entry("campaign_monitoring", 0, "completed"))
 
+    _write_manifest(run_id, started_at, stages)
     log.info("Pipeline complete — 11 checkpoint CSVs written to %s", settings.OUTPUT_DIR)
+
+
+def _write_manifest(run_id: str, started_at: str, stages: list) -> None:
+    manifest = {
+        "run_id": run_id,
+        "started_at": started_at,
+        "completed_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "mock_mode": settings.MOCK_MODE,
+        "stages": stages,
+        "config_hash": _config_hash(),
+    }
+    os.makedirs(settings.OUTPUT_DIR, exist_ok=True)
+    path = os.path.join(settings.OUTPUT_DIR, "run_manifest.json")
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, indent=2)
+    log.info("Run manifest written: %s", path)
 
 
 if __name__ == "__main__":
