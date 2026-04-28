@@ -282,7 +282,27 @@ def main() -> None:
     apollo, clay, hubspot, zerobounce, neverbounce, validity = _get_clients()
 
     enriched = run_company_pipeline(apollo, clay)
+
+    approved_companies = [c for c in enriched if c.get("contact_discovery_approved")]
+    if not approved_companies:
+        log.warning(
+            "Circuit breaker: no approved companies — skipping contact pipeline and activation"
+        )
+        run_campaign_monitoring(validity)
+        return
+
     validated = run_contact_pipeline(enriched, apollo, zerobounce, neverbounce)
+
+    approved_contacts = [
+        c for c in validated if c.get("final_validation_status") == "approved"
+    ]
+    if not approved_contacts:
+        log.warning(
+            "Circuit breaker: no approved contacts — skipping activation pipeline"
+        )
+        run_campaign_monitoring(validity)
+        return
+
     run_activation_pipeline(validated, enriched, hubspot)
     run_campaign_monitoring(validity)
 
