@@ -46,6 +46,7 @@ def load_companies(file_path: str) -> list[dict]:
         raw = json.load(f)
 
     companies = []
+    seen_ids: set = set()
     for record in raw:
         missing = [field for field in REQUIRED_FIELDS if field not in record]
         if missing:
@@ -60,6 +61,11 @@ def load_companies(file_path: str) -> list[dict]:
                 normalized.get("company_id", "?"), exc.error_count()
             )
             continue
+        cid = normalized.get("company_id", "")
+        if cid in seen_ids:
+            log.warning("Skipping duplicate company_id '%s'", cid)
+            continue
+        seen_ids.add(cid)
         companies.append(normalized)
 
     return companies

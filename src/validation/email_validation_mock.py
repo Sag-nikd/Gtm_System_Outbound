@@ -20,6 +20,7 @@ def load_contacts(file_path: str) -> list[dict]:
         raw = json.load(f)
 
     contacts = []
+    seen_emails: set = set()
     for record in raw:
         try:
             Contact(**record)
@@ -29,6 +30,12 @@ def load_contacts(file_path: str) -> list[dict]:
                 record.get("contact_id", "?"), exc.error_count()
             )
             continue
+        email = record.get("email", "")
+        if email and email in seen_emails:
+            log.warning("Skipping duplicate email '%s'", email)
+            continue
+        if email:
+            seen_emails.add(email)
         contacts.append(record)
     return contacts
 
