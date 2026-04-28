@@ -18,12 +18,36 @@ class HubSpotMockClient(HubSpotBase):
     Future: replace with HubSpot Private App API upsert calls.
     """
 
-    def create_company_records(self, companies: List[dict]) -> List[dict]:
-        log.info("HubSpot mock: building %d company records", len(companies))
-        return create_hubspot_company_records(companies)
+    def upsert_companies(self, companies: List[dict]) -> List[dict]:
+        seen_domains: set = set()
+        deduped = []
+        for co in companies:
+            domain = co.get("domain", "")
+            if domain and domain in seen_domains:
+                log.warning("HubSpot mock: duplicate domain '%s' — skipping", domain)
+                continue
+            if domain:
+                seen_domains.add(domain)
+            deduped.append(co)
+        log.info(
+            "HubSpot mock: building %d company records (%d duplicates removed)",
+            len(deduped), len(companies) - len(deduped),
+        )
+        return create_hubspot_company_records(deduped)
 
-    def create_contact_records(
-        self, contacts: List[dict], companies: List[dict]
-    ) -> List[dict]:
-        log.info("HubSpot mock: building contact records for %d contacts", len(contacts))
-        return create_hubspot_contact_records(contacts, companies)
+    def upsert_contacts(self, contacts: List[dict], companies: List[dict]) -> List[dict]:
+        seen_emails: set = set()
+        deduped = []
+        for ct in contacts:
+            email = ct.get("email", "")
+            if email and email in seen_emails:
+                log.warning("HubSpot mock: duplicate email '%s' — skipping", email)
+                continue
+            if email:
+                seen_emails.add(email)
+            deduped.append(ct)
+        log.info(
+            "HubSpot mock: building contact records for %d contacts (%d duplicates removed)",
+            len(deduped), len(contacts) - len(deduped),
+        )
+        return create_hubspot_contact_records(deduped, companies)

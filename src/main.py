@@ -224,11 +224,11 @@ def run_activation_pipeline(
              09_email_sequence_export.csv, 10_linkedin_outreach_export.csv
     """
     try:
-        hs_companies = hubspot.create_company_records(enriched)
+        hs_companies = hubspot.upsert_companies(enriched)
         _save(pd.DataFrame(hs_companies), "07_hubspot_company_export.csv")
         log.info("HubSpot company records: %d", len(hs_companies))
 
-        hs_contacts = hubspot.create_contact_records(validated, enriched)
+        hs_contacts = hubspot.upsert_contacts(validated, enriched)
         _save(pd.DataFrame(hs_contacts), "08_hubspot_contact_export.csv")
         log.info("HubSpot contact records: %d", len(hs_contacts))
 

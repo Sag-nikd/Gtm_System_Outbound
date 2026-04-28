@@ -21,16 +21,14 @@ class HubSpotAPIClient(HubSpotBase):
         self.token = token
 
     @api_retry
-    def create_company_records(self, companies: List[dict]) -> List[dict]:
+    def upsert_companies(self, companies: List[dict]) -> List[dict]:
         raise NotImplementedError(
             "HubSpot API client not yet implemented. "
             "Set MOCK_MODE=true or provide HUBSPOT_PRIVATE_APP_TOKEN in .env."
         )
 
     @api_retry
-    def create_contact_records(
-        self, contacts: List[dict], companies: List[dict]
-    ) -> List[dict]:
+    def upsert_contacts(self, contacts: List[dict], companies: List[dict]) -> List[dict]:
         raise NotImplementedError(
             "HubSpot API client not yet implemented. "
             "Set MOCK_MODE=true or provide HUBSPOT_PRIVATE_APP_TOKEN in .env."
