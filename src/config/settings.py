@@ -1,98 +1,88 @@
+"""Application settings — loaded from .env.local (or environment) via pydantic-settings."""
 from __future__ import annotations
 
 import os
-from dotenv import load_dotenv
+from functools import lru_cache
+from pathlib import Path
 
-load_dotenv()
-
-
-class Settings:
-    def __init__(self) -> None:
-        self.MOCK_MODE: bool = os.getenv("MOCK_MODE", "true").lower() == "true"
-
-        # Per-integration mode overrides: "mock" or "live".
-        # Defaults to the global MOCK_MODE setting when not explicitly set.
-        _default_mode = "mock" if self.MOCK_MODE else "live"
-        self.APOLLO_MODE: str = os.getenv("APOLLO_MODE", _default_mode)
-        self.CLAY_MODE: str = os.getenv("CLAY_MODE", _default_mode)
-        self.HUBSPOT_MODE: str = os.getenv("HUBSPOT_MODE", _default_mode)
-        self.ZEROBOUNCE_MODE: str = os.getenv("ZEROBOUNCE_MODE", _default_mode)
-        self.NEVERBOUNCE_MODE: str = os.getenv("NEVERBOUNCE_MODE", _default_mode)
-        self.VALIDITY_MODE: str = os.getenv("VALIDITY_MODE", _default_mode)
-
-        self.APOLLO_API_KEY: str = os.getenv("APOLLO_API_KEY", "")
-        self.CLAY_API_KEY: str = os.getenv("CLAY_API_KEY", "")
-        self.HUBSPOT_PRIVATE_APP_TOKEN: str = os.getenv("HUBSPOT_PRIVATE_APP_TOKEN", "")
-        self.ZEROBOUNCE_API_KEY: str = os.getenv("ZEROBOUNCE_API_KEY", "")
-        self.NEVERBOUNCE_API_KEY: str = os.getenv("NEVERBOUNCE_API_KEY", "")
-        self.VALIDITY_API_KEY: str = os.getenv("VALIDITY_API_KEY", "")
-
-        self.LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
-
-        # Paths resolved from project root (3 levels up from src/config/settings.py)
-        _here = os.path.dirname(os.path.abspath(__file__))
-        self.BASE_DIR: str = os.path.dirname(os.path.dirname(_here))
-        self.DATA_DIR: str = os.path.join(self.BASE_DIR, "data")
-        self.CONFIG_DIR: str = os.path.join(self.BASE_DIR, "config")
-
-        _output_env = os.getenv("OUTPUT_DIR", "outputs")
-        self.OUTPUT_DIR: str = (
-            _output_env
-            if os.path.isabs(_output_env)
-            else os.path.join(self.BASE_DIR, _output_env)
-        )
-
-        self.LOG_FORMAT: str = os.getenv("LOG_FORMAT", "text")
-
-        # Storage
-        self.STORAGE_ENABLED: bool = (
-            os.getenv("STORAGE_ENABLED", "false").lower() == "true"
-        )
-        self.STORAGE_DB_PATH: str = os.getenv(
-            "STORAGE_DB_PATH",
-            os.path.join(self.BASE_DIR, "outputs", "gtm_pipeline.db"),
-        )
-
-        # ICP Intelligence (Stage 0) settings
-        self.ICP_INTELLIGENCE_ENABLED: bool = (
-            os.getenv("ICP_INTELLIGENCE_ENABLED", "false").lower() == "true"
-        )
-        self.ICP_DEAL_DATA_PATH: str = os.getenv(
-            "ICP_DEAL_DATA_PATH",
-            os.path.join(self.DATA_DIR, "icp_intelligence", "mock_deal_history.json"),
-        )
-        self.ICP_PIPELINE_DATA_PATH: str = os.getenv("ICP_PIPELINE_DATA_PATH", "")
-        self.ICP_TAM_DATA_PATH: str = os.getenv("ICP_TAM_DATA_PATH", "")
-        self.ICP_FEEDBACK_ENABLED: bool = (
-            os.getenv("ICP_FEEDBACK_ENABLED", "false").lower() == "true"
-        )
-        self.ICP_DATA_SOURCE: str = os.getenv("ICP_DATA_SOURCE", "csv")
-
-        self._validate()
-
-    # Map per-integration MODE attr → required API key attr
-    _MODE_KEY_MAP = [
-        ("APOLLO_MODE", "APOLLO_API_KEY"),
-        ("CLAY_MODE", "CLAY_API_KEY"),
-        ("HUBSPOT_MODE", "HUBSPOT_PRIVATE_APP_TOKEN"),
-        ("ZEROBOUNCE_MODE", "ZEROBOUNCE_API_KEY"),
-        ("NEVERBOUNCE_MODE", "NEVERBOUNCE_API_KEY"),
-        ("VALIDITY_MODE", "VALIDITY_API_KEY"),
-    ]
-
-    # Kept for backwards-compat with existing settings tests
-    _REQUIRED_LIVE_KEYS = [key for _, key in _MODE_KEY_MAP]
-
-    def _validate(self) -> None:
-        missing = [
-            key
-            for mode_attr, key in self._MODE_KEY_MAP
-            if getattr(self, mode_attr, "live") == "live" and not getattr(self, key, "")
-        ]
-        if missing:
-            raise EnvironmentError(
-                f"Missing required keys for live mode: {', '.join(missing)}"
-            )
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-settings = Settings()
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=(".env.local", ".env"),
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
+
+    # ── General ───────────────────────────────────────────────────────────────
+    log_level: str = "INFO"
+    json_logs: bool = False
+    mock_mode: bool = True
+
+    # ── Paths ─────────────────────────────────────────────────────────────────
+    base_dir: Path = Field(default_factory=lambda: Path(__file__).parent.parent.parent)
+
+    @property
+    def data_dir(self) -> Path:
+        return self.base_dir / "data"
+
+    @property
+    def config_dir(self) -> Path:
+        return self.base_dir / "config"
+
+    @property
+    def output_dir(self) -> Path:
+        return self.base_dir / "outputs"
+
+    @property
+    def db_url(self) -> str:
+        db_path = self.data_dir / "gtm_os.db"
+        return f"sqlite+aiosqlite:///{db_path}"
+
+    # ── Vendor API keys ───────────────────────────────────────────────────────
+    apollo_api_key: str = ""
+    hubspot_private_app_token: str = ""
+    instantly_api_key: str = ""
+    instantly_test_campaign_id: str = ""
+    zerobounce_api_key: str = ""
+    anthropic_api_key: str = ""
+    voyage_api_key: str = ""
+    granola_api_key: str = ""
+    notion_api_key: str = ""
+    notion_root_page_ids: str = ""  # comma-separated
+    slack_bot_token: str = ""
+    sendgrid_api_key: str = ""
+    sendgrid_from_email: str = ""
+    gong_access_key: str = ""
+    gong_access_key_secret: str = ""
+
+    # ── Webhook secrets ───────────────────────────────────────────────────────
+    instantly_webhook_secret: str = ""
+    hubspot_webhook_secret: str = ""
+
+    # ── Per-integration mode overrides ────────────────────────────────────────
+    apollo_mode: str = ""       # "mock" | "live" | "" (falls back to mock_mode)
+    hubspot_mode: str = ""
+    instantly_mode: str = ""
+    zerobounce_mode: str = ""
+
+    def integration_mode(self, vendor: str) -> str:
+        override = getattr(self, f"{vendor}_mode", "")
+        if override:
+            return override
+        return "mock" if self.mock_mode else "live"
+
+    @property
+    def notion_page_ids(self) -> list[str]:
+        return [p.strip() for p in self.notion_root_page_ids.split(",") if p.strip()]
+
+
+@lru_cache(maxsize=1)
+def get_settings() -> Settings:
+    s = Settings()
+    os.makedirs(s.data_dir, exist_ok=True)
+    os.makedirs(s.output_dir, exist_ok=True)
+    return s

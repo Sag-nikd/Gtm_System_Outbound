@@ -1,0 +1,104 @@
+# Vendor pricing config — used by cost tracker to compute dollar_cost per call.
+# unit: the dimension being priced (emails, companies, tokens, requests)
+# rate: dollars per unit
+# notes: human-readable explanation
+
+apollo:
+  search_companies:
+    unit: request
+    rate: 0.0
+    notes: "Included in Apollo plan; set rate if metered"
+  search_contacts:
+    unit: request
+    rate: 0.0
+    notes: "Included in Apollo plan"
+  enrich_company:
+    unit: request
+    rate: 0.01
+    notes: "$0.01 per enrichment credit (approximate)"
+  enrich_contact:
+    unit: request
+    rate: 0.01
+
+zerobounce:
+  validate_email:
+    unit: email
+    rate: 0.008
+    notes: "$8 per 1000 validations on pay-as-you-go"
+  validate_batch:
+    unit: email
+    rate: 0.008
+
+instantly:
+  add_leads_to_campaign:
+    unit: lead
+    rate: 0.0
+    notes: "Included in Instantly plan"
+  get_campaign_analytics:
+    unit: request
+    rate: 0.0
+  list_campaigns:
+    unit: request
+    rate: 0.0
+
+hubspot:
+  upsert_company:
+    unit: request
+    rate: 0.0
+    notes: "Included in HubSpot plan"
+  upsert_contact:
+    unit: request
+    rate: 0.0
+  associate_contact_to_company:
+    unit: request
+    rate: 0.0
+
+anthropic:
+  # Rates in dollars per 1M tokens (input / output)
+  claude-sonnet-4-5:
+    unit: token
+    input_rate_per_million: 3.0
+    output_rate_per_million: 15.0
+  claude-haiku-4-5:
+    unit: token
+    input_rate_per_million: 0.25
+    output_rate_per_million: 1.25
+
+voyage:
+  embed:
+    unit: token
+    rate_per_million: 0.12
+    notes: "voyage-3-large at $0.12 per 1M tokens"
+
+gong:
+  list_calls:
+    unit: request
+    rate: 0.0
+    notes: "Included in Gong plan"
+  get_transcript:
+    unit: request
+    rate: 0.0
+
+granola:
+  list_notes:
+    unit: request
+    rate: 0.0
+
+notion:
+  get_page:
+    unit: request
+    rate: 0.0
+  list_children:
+    unit: request
+    rate: 0.0
+
+sendgrid:
+  send_email:
+    unit: email
+    rate: 0.0
+    notes: "100 emails/day free; $0.0007/email above free tier"
+
+slack:
+  post_message:
+    unit: request
+    rate: 0.0

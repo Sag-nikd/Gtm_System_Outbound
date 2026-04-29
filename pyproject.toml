@@ -1,0 +1,79 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "gtm-os"
+version = "0.0.1"
+description = "GTM operating system — outbound + intelligence pipeline"
+requires-python = ">=3.11"
+dependencies = [
+    # HTTP
+    "httpx>=0.27.0",
+    # Database
+    "sqlalchemy[asyncio]>=2.0.0",
+    "alembic>=1.13.0",
+    "aiosqlite>=0.20.0",
+    # Validation / settings
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    # CLI
+    "typer>=0.12.0",
+    "rich>=13.0.0",
+    # Logging
+    "structlog>=24.0.0",
+    # Retry
+    "tenacity>=8.2.0",
+    # YAML
+    "pyyaml>=6.0",
+    # Scheduler (in-process nightly jobs)
+    "apscheduler>=3.10.0",
+    # LLM
+    "anthropic>=0.26.0",
+    "openai>=1.0.0",
+]
+
+[project.scripts]
+gtm = "src.cli.app:app"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "vcrpy>=6.0.0",
+    "pytest-cov>=5.0.0",
+    "mypy>=1.10.0",
+    "ruff>=0.4.0",
+    "types-pyyaml",
+    "types-requests",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+exclude = ["tests/", "alembic/"]
+
+[[tool.mypy.overrides]]
+module = ["vcrpy.*", "vcr.*", "apscheduler.*", "aiosqlite.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "--tb=short"
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["src/db/migrations/*"]
