@@ -1,24 +1,21 @@
 from __future__ import annotations
 
-import os
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
+
+import requests
 
 from src.utils.logger import get_logger
 from src.utils.retry import api_retry
 
 log = get_logger(__name__)
 
-# Salesforce uses OAuth2 username-password flow for server-to-server access.
-# Metadata API (for creating custom fields) requires additional Tooling API calls
-# or Metadata API SOAP calls — more complex than HubSpot's REST properties API.
-# Live field creation is stubbed with clear TODOs. Dry-run is fully supported.
+_API_VERSION = "v57.0"
 
 
 class SalesforceClient:
     """
-    Salesforce REST + Tooling API client stub.
-    authenticate() obtains an OAuth2 access token.
-    Field/object creation methods raise NotImplementedError — see TODOs below.
+    Salesforce REST + Tooling API client.
+    Call authenticate() before making any API requests.
     """
 
     def __init__(
@@ -38,71 +35,132 @@ class SalesforceClient:
         self.instance_url = instance_url.rstrip("/")
         self._access_token: str = ""
 
+    # ── Authentication ────────────────────────────────────────────────────────
+
     @api_retry
     def authenticate(self) -> bool:
         """
-        Obtain OAuth2 access token using username-password flow.
-
-        TODO: Implement with requests:
-            POST {instance_url}/services/oauth2/token
-            grant_type=password
-            client_id={client_id}
-            client_secret={client_secret}
-            username={username}
-            password={password+security_token}
+        Obtain OAuth2 access token via username-password flow.
+        Returns True on success; raises on failure.
         """
-        raise NotImplementedError(
-            "Salesforce live authentication not yet implemented. "
-            "Use --mode dry-run or implement OAuth2 username-password flow."
+        resp = requests.post(
+            f"{self.instance_url}/services/oauth2/token",
+            data={
+                "grant_type": "password",
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+                "username": self.username,
+                "password": self.password + self.security_token,
+            },
+            timeout=30,
         )
+        resp.raise_for_status()
+        data = resp.json()
+        self._access_token = data["access_token"]
+        # Some flows return a different instance_url in the token response
+        if "instance_url" in data:
+            self.instance_url = data["instance_url"].rstrip("/")
+        log.info("Salesforce: authenticated as %s", self.username)
+        return True
+
+    def _headers(self) -> Dict[str, str]:
+        if not self._access_token:
+            raise RuntimeError("SalesforceClient: call authenticate() before making API calls.")
+        return {
+            "Authorization": f"Bearer {self._access_token}",
+            "Content-Type": "application/json",
+        }
+
+    def _url(self, path: str) -> str:
+        return f"{self.instance_url}/services/data/{_API_VERSION}{path}"
+
+    # ── Object metadata ───────────────────────────────────────────────────────
 
     @api_retry
     def get_object_fields(self, object_name: str) -> List[Dict[str, Any]]:
         """
-        TODO: GET {instance_url}/services/data/v57.0/sobjects/{object_name}/describe/
-        Returns field metadata including Name, Type, Custom.
+        Describe a Salesforce object and return its field list.
+        GET /services/data/v57.0/sobjects/{object_name}/describe/
         """
-        raise NotImplementedError(
-            f"get_object_fields({object_name}) not yet implemented. Use --mode dry-run."
+        resp = requests.get(
+            self._url(f"/sobjects/{object_name}/describe/"),
+            headers=self._headers(),
+            timeout=30,
         )
-
-    @api_retry
-    def create_custom_field(
-        self, object_name: str, field_config: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """
-        TODO: Use Tooling API to create a CustomField metadata record.
-            POST {instance_url}/services/data/v57.0/tooling/sobjects/CustomField/
-            Body: {FullName: '{object_name}.{field_name}', Metadata: {...}}
-
-        Requires:
-          1. Create CustomField via Tooling API
-          2. Deploy via MetadataService or Tooling API deployments
-          3. Add to Page Layouts (separate step — do manually or via Metadata API)
-        """
-        raise NotImplementedError(
-            f"Salesforce live custom field creation for {object_name} not yet implemented. "
-            "Use --mode dry-run to generate the field plan, then create fields manually in "
-            "Salesforce Setup → Object Manager → {object_name} → Fields & Relationships."
-        )
+        resp.raise_for_status()
+        return resp.json().get("fields", [])
 
     @api_retry
     def get_opportunity_stages(self) -> List[Dict[str, Any]]:
-        """
-        TODO: SOQL query via REST API:
-            SELECT MasterLabel, Probability FROM OpportunityStage WHERE IsActive = true
-        """
-        raise NotImplementedError(
-            "get_opportunity_stages not yet implemented. Use --mode dry-run."
+        """Return active Opportunity stage picklist values via SOQL."""
+        soql = "SELECT MasterLabel, Probability FROM OpportunityStage WHERE IsActive = true"
+        resp = requests.get(
+            self._url("/query/"),
+            headers=self._headers(),
+            params={"q": soql},
+            timeout=30,
         )
+        resp.raise_for_status()
+        return resp.json().get("records", [])
+
+    # ── Record operations ─────────────────────────────────────────────────────
+
+    @api_retry
+    def upsert_account(self, external_id_field: str, external_id: str, data: Dict[str, Any]) -> str:
+        """
+        Upsert a Salesforce Account using an external ID field.
+        Returns the Salesforce Account ID.
+        """
+        resp = requests.patch(
+            self._url(f"/sobjects/Account/{external_id_field}/{external_id}"),
+            headers=self._headers(),
+            json=data,
+            timeout=30,
+        )
+        resp.raise_for_status()
+        return resp.json().get("id", external_id)
+
+    @api_retry
+    def upsert_contact(self, external_id_field: str, external_id: str, data: Dict[str, Any]) -> str:
+        """
+        Upsert a Salesforce Contact using an external ID field.
+        Returns the Salesforce Contact ID.
+        """
+        resp = requests.patch(
+            self._url(f"/sobjects/Contact/{external_id_field}/{external_id}"),
+            headers=self._headers(),
+            json=data,
+            timeout=30,
+        )
+        resp.raise_for_status()
+        return resp.json().get("id", external_id)
+
+    @api_retry
+    def create_custom_field(self, object_name: str, field_config: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Create a custom field via Salesforce Tooling API.
+        POST /services/data/v57.0/tooling/sobjects/CustomField/
+        """
+        resp = requests.post(
+            f"{self.instance_url}/services/data/{_API_VERSION}/tooling/sobjects/CustomField/",
+            headers=self._headers(),
+            json={
+                "FullName": f"{object_name}.{field_config['fullName']}",
+                "Metadata": field_config.get("metadata", {}),
+            },
+            timeout=30,
+        )
+        resp.raise_for_status()
+        return resp.json()
 
     @api_retry
     def create_opportunity_stage(self, stage_config: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        TODO: OpportunityStage picklist values are managed via Metadata API.
-        This is safer done in Setup → Picklist Value Sets, or via Metadata API deployment.
-        """
-        raise NotImplementedError(
-            "Salesforce opportunity stage creation requires Metadata API deployment. "
-            "Add stages manually in Setup → Opportunity Stages. Use --mode dry-run for the plan."
+        """Create an Opportunity stage via Tooling API."""
+        resp = requests.post(
+            f"{self.instance_url}/services/data/{_API_VERSION}/tooling/sobjects/OpportunityStage/",
+            headers=self._headers(),
+            json=stage_config,
+            timeout=30,
         )
+        resp.raise_for_status()
+        return resp.json()
