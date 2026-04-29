@@ -6,10 +6,17 @@ __pycache__/
 dist/
 build/
 
-# Virtual environment
+# Virtual environments
 venv/
-.env
+venv311/
 .venv/
+
+# Secrets
+.env
+.env.local
+
+# Database
+data/gtm_os.db
 
 # Outputs (generated CSVs - run demo.py to regenerate)
 outputs/
