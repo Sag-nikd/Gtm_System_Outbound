@@ -1,39 +1,48 @@
 {
   "organization_search": {
     "industry_keywords": [
-      "Managed Care",
-      "Health Plan",
-      "Provider"
+      "E-commerce",
+      "Financial Services",
+      "B2B Technology",
+      "SaaS",
+      "Retail Technology",
+      "Logistics & Supply Chain",
+      "Manufacturing"
     ],
     "employee_ranges": [
       {
+        "min": 1,
+        "max": 99
+      },
+      {
+        "min": 100,
+        "max": 499
+      },
+      {
         "min": 500,
         "max": 1999
-      },
-      {
-        "min": 2000,
-        "max": 9999
-      },
-      {
-        "min": 10000,
-        "max": 999999
       }
     ],
     "location_states": [
-      "Missouri",
-      "Texas",
-      "Michigan",
-      "Indiana",
+      "New York",
+      "Illinois",
+      "Colorado",
       "Georgia",
+      "Ohio",
+      "Massachusetts",
+      "Utah",
+      "Virginia",
+      "Connecticut",
       "Pennsylvania",
-      "Ohio"
+      "Indiana"
     ],
     "technology_names": [
-      "Epic",
       "HubSpot",
       "Microsoft Dynamics 365",
+      "SAP",
       "Salesforce",
-      "Twilio"
+      "Shopify",
+      "Stripe"
     ]
   },
   "contact_search": {
@@ -52,17 +61,31 @@
   },
   "exclusions": {
     "domains": [
-      "centene.com",
-      "bluepathhealth.com",
-      "meridiancaresolutions.com",
-      "elevancecommunity.com",
-      "alliantmanagedcare.com",
-      "highmarkblueshieldhealth.com",
-      "riversideregional.org",
-      "caresource.com"
+      "nexgenb2b.com",
+      "dataloopanalytics.com",
+      "shopstreamcommerce.com",
+      "apexfinancialgroup.com",
+      "fleetroutelogistics.com",
+      "tradebridgemarketplace.com",
+      "vantagecloudplatform.com",
+      "cartedgeretailtech.com",
+      "summitcapitalpartners.com",
+      "brightmartretail.com",
+      "clearpathsaas.com",
+      "meridianpayments.com",
+      "pinnaclesaasgroup.com",
+      "novapayfin.com",
+      "connectxplatform.com",
+      "skybridgelogistics.com",
+      "ciphershieldsecurity.com",
+      "meshpayb2b.com",
+      "riverstonecapital.com",
+      "anchorinsurancegroup.com",
+      "forgemanufacturing.com",
+      "quantumrevops.com"
     ],
     "industries": []
   },
   "estimated_tam_size": 0,
-  "query_rationale": "Managed Care organizations are your highest-converting segment (47% conversion). Targeting 2000-9999 employee count band based on win patterns. Excluding 0 industries with 0% conversion and 8 existing customers."
+  "query_rationale": "E-commerce organizations are your highest-converting segment (73% conversion). Targeting 100-499 employee count band based on win patterns. Excluding 0 industries with 0% conversion and 22 existing customers."
 }

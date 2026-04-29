@@ -1,0 +1,26 @@
+{
+  "organization_search": {
+    "industry_keywords": ["Manufacturing", "Industrial Equipment", "Precision Parts", "Automotive"],
+    "employee_ranges": [
+      {"min": 100, "max": 999},
+      {"min": 1000, "max": 4999},
+      {"min": 5000, "max": 99999}
+    ],
+    "location_states": ["Michigan", "Ohio", "Indiana", "Texas", "Illinois", "Pennsylvania", "California"],
+    "technology_names": ["SAP", "Microsoft Dynamics 365", "Oracle", "Salesforce", "Infor"]
+  },
+  "contact_search": {
+    "persona_titles": [
+      "VP Operations",
+      "Director of Manufacturing",
+      "Chief Operating Officer",
+      "VP Supply Chain",
+      "Plant Manager",
+      "Director of Production"
+    ],
+    "seniority_levels": ["VP", "Director", "C-Suite"]
+  },
+  "exclusions": {"domains": [], "industries": []},
+  "estimated_tam_size": 0,
+  "query_rationale": "Manufacturing vertical template — targeting industrial manufacturers 100-99999 employees."
+}

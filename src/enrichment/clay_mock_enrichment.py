@@ -54,7 +54,7 @@ def enrich_accounts(companies: list) -> list:
             company["contact_discovery_approved"] = approved
 
             enriched.append(company)
-        except Exception as exc:
+        except (AttributeError, KeyError, TypeError, ValueError) as exc:
             failures += 1
             cid = company.get("company_id", "?") if isinstance(company, dict) else "?"
             log.warning("Enrichment failed for %s: %s", cid, exc)

@@ -1,0 +1,26 @@
+{
+  "organization_search": {
+    "industry_keywords": ["SaaS", "B2B Technology", "Cloud Software", "Software as a Service"],
+    "employee_ranges": [
+      {"min": 20, "max": 199},
+      {"min": 200, "max": 999},
+      {"min": 1000, "max": 4999}
+    ],
+    "location_states": ["California", "New York", "Texas", "Washington", "Colorado", "Massachusetts"],
+    "technology_names": ["HubSpot", "Salesforce", "Marketo", "Intercom", "Stripe", "Segment"]
+  },
+  "contact_search": {
+    "persona_titles": [
+      "VP Operations",
+      "Chief Revenue Officer",
+      "VP of Sales",
+      "Director of Growth",
+      "Head of Revenue Operations",
+      "VP Revenue Operations"
+    ],
+    "seniority_levels": ["VP", "Director", "C-Suite"]
+  },
+  "exclusions": {"domains": [], "industries": []},
+  "estimated_tam_size": 0,
+  "query_rationale": "SaaS vertical template — targeting software companies 20-4999 employees using modern GTM tools."
+}

@@ -110,7 +110,7 @@ class SchedulerDaemon:
                 import pytz
                 tz = pytz.timezone(tz_name)
                 now_tz = datetime.now(tz)
-            except Exception:
+            except (ImportError, KeyError, AttributeError):
                 now_tz = datetime.now()
             # Was the scheduled time within the last 31 seconds?
             prev = croniter(cron, now_tz).get_prev(datetime)
@@ -128,7 +128,7 @@ class SchedulerDaemon:
                 if elapsed < 55:
                     return False
             return True
-        except Exception:
+        except (ImportError, ValueError, OSError):
             return False
 
     def _run_stage(self, stage_name: str) -> None:
@@ -168,7 +168,7 @@ class SchedulerDaemon:
                     # Check if process is still alive.
                     if _pid_alive(pid):
                         return False
-            except Exception:
+            except (OSError, json.JSONDecodeError, ValueError):
                 pass
         payload = {"pid": os.getpid(), "started_at": datetime.now(timezone.utc).isoformat()}
         with open(path, "w") as f:

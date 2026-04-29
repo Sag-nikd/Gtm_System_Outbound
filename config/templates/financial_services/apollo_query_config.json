@@ -1,0 +1,26 @@
+{
+  "organization_search": {
+    "industry_keywords": ["Financial Services", "Fintech", "Banking", "Insurance", "Payments"],
+    "employee_ranges": [
+      {"min": 50, "max": 499},
+      {"min": 500, "max": 2999},
+      {"min": 3000, "max": 49999}
+    ],
+    "location_states": ["New York", "Illinois", "California", "Connecticut", "Massachusetts", "Texas"],
+    "technology_names": ["Salesforce", "Stripe", "Microsoft Dynamics 365", "HubSpot", "Plaid"]
+  },
+  "contact_search": {
+    "persona_titles": [
+      "Chief Financial Officer",
+      "VP Operations",
+      "Chief Operating Officer",
+      "Head of Finance Operations",
+      "Director of Payments",
+      "VP Risk & Compliance"
+    ],
+    "seniority_levels": ["VP", "Director", "C-Suite"]
+  },
+  "exclusions": {"domains": [], "industries": []},
+  "estimated_tam_size": 0,
+  "query_rationale": "Financial Services vertical template — targeting banks, fintechs, and insurers 50-49999 employees."
+}

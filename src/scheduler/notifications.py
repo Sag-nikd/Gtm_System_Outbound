@@ -102,7 +102,7 @@ def _send_slack(message: str, channel: str, webhook_url: str, mention_channel: b
         )
         urllib.request.urlopen(req, timeout=10)
         log.debug("Slack notification sent to %s", channel)
-    except Exception as exc:
+    except (OSError, ValueError) as exc:
         log.warning("Slack notification failed: %s", exc)
 
 
@@ -126,7 +126,7 @@ def _send_email(subject: str, body: str, to_email: str) -> None:
                 s.login(smtp_user, smtp_pass)
             s.sendmail(from_email, [to_email], msg.as_string())
         log.debug("Email alert sent to %s", to_email)
-    except Exception as exc:
+    except (OSError, smtplib.SMTPException) as exc:
         log.warning("Email notification failed: %s", exc)
 
 

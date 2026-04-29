@@ -186,7 +186,7 @@ def _signal_daemon_reload() -> None:
             pid = int(f.read().strip())
         os.kill(pid, signal.SIGHUP)
         log.debug("Sent SIGHUP to daemon PID %d", pid)
-    except Exception:
+    except (OSError, ValueError):
         pass
 
 

@@ -4,6 +4,8 @@ import os
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
+import requests
+
 from src.crm.base import (
     CRMProvider,
     FieldResult,
@@ -87,7 +89,7 @@ class HubSpotSetupProvider(CRMProvider):
                 "displayOrder": -1,
             })
             log.info("[%s] Created property group: gtm_properties", object_name)
-        except Exception as exc:
+        except (requests.HTTPError, requests.RequestException, KeyError, ValueError) as exc:
             log.warning(
                 "[%s] Could not ensure property group, properties will use default group: %s",
                 object_name, exc,
@@ -174,7 +176,7 @@ class HubSpotSetupProvider(CRMProvider):
                 field_type=field_type,
                 status=FieldStatus.CREATED,
             )
-        except Exception as exc:
+        except (requests.HTTPError, requests.RequestException, ValueError) as exc:
             log.error("[%s] Failed to create %s: %s", object_name, internal_name, exc)
             return FieldResult(
                 object_name=object_name,
@@ -221,15 +223,14 @@ class HubSpotSetupProvider(CRMProvider):
                 status=FieldStatus.CREATED,
                 pipeline_id=pid,
             )
-        except Exception as exc:
+        except (requests.HTTPError, requests.RequestException, ValueError) as exc:
             # Check if this is a pipeline limit error (free plan = 1 pipeline max)
             is_limit = False
             try:
-                import requests as _req
-                if isinstance(exc, _req.HTTPError) and exc.response is not None:
+                if isinstance(exc, requests.HTTPError) and exc.response is not None:
                     body = exc.response.json()
                     is_limit = body.get("category") == "API_LIMIT" or "limit" in body.get("message", "").lower()
-            except Exception:
+            except (AttributeError, ValueError):
                 pass
             if is_limit:
                 log.info("Pipeline limit reached — adopting existing pipeline")
@@ -260,7 +261,7 @@ class HubSpotSetupProvider(CRMProvider):
                     "Renamed existing pipeline '%s' to '%s' (id=%s)",
                     current_label, desired_name, pid,
                 )
-            except Exception as exc:
+            except (requests.HTTPError, requests.RequestException, ValueError) as exc:
                 log.warning("Could not rename pipeline: %s — using as-is", exc)
         else:
             log.info("Existing pipeline already named '%s' — reusing (id=%s)", desired_name, pid)
@@ -339,7 +340,7 @@ class HubSpotSetupProvider(CRMProvider):
                 status=FieldStatus.CREATED,
                 stage_id=sid,
             )
-        except Exception as exc:
+        except (requests.HTTPError, requests.RequestException, ValueError) as exc:
             log.error("Failed to create stage '%s': %s", label, exc)
             return StageResult(
                 pipeline_name=pipeline_name,

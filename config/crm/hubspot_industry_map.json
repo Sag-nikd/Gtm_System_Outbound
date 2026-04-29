@@ -1,0 +1,22 @@
+{
+  "B2B Technology": "INFORMATION_TECHNOLOGY_AND_SERVICES",
+  "SaaS": "COMPUTER_SOFTWARE",
+  "E-commerce": "RETAIL",
+  "Financial Services": "FINANCIAL_SERVICES",
+  "Logistics & Supply Chain": "LOGISTICS_AND_SUPPLY_CHAIN",
+  "Retail Technology": "RETAIL",
+  "Manufacturing": "MECHANICAL_OR_INDUSTRIAL_ENGINEERING",
+  "Professional Services": "MANAGEMENT_CONSULTING",
+  "Marketing Technology": "MARKETING_AND_ADVERTISING",
+  "Energy & Utilities": "UTILITIES",
+  "Education Technology": "EDUCATION_MANAGEMENT",
+  "HR Technology": "HUMAN_RESOURCES",
+  "Real Estate Technology": "REAL_ESTATE",
+  "Construction Technology": "CONSTRUCTION",
+  "Banking": "BANKING",
+  "Insurance": "INSURANCE",
+  "Technology": "INFORMATION_TECHNOLOGY_AND_SERVICES",
+  "Software": "COMPUTER_SOFTWARE",
+  "Consulting": "MANAGEMENT_CONSULTING",
+  "Government": "GOVERNMENT_ADMINISTRATION"
+}

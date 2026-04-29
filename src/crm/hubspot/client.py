@@ -43,7 +43,7 @@ class HubSpotClient:
         if not resp.ok:
             try:
                 log.debug("HubSpot API error body: %s", resp.json())
-            except Exception:
+            except (ValueError, KeyError):
                 log.debug("HubSpot API error body (raw): %s", resp.text[:500])
         resp.raise_for_status()
         return resp.json()

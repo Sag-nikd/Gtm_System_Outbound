@@ -64,7 +64,7 @@ class HubSpotAPIClient(HubSpotBase):
                 for r in resp.get("results", [])
                 if r["properties"].get(prop_name)
             }
-        except Exception as exc:
+        except (requests.HTTPError, requests.RequestException, KeyError, ValueError) as exc:
             log.warning("HubSpot search failed: %s", exc)
             return {}
 
@@ -186,7 +186,7 @@ class HubSpotAPIClient(HubSpotBase):
                         timeout=20,
                     ).raise_for_status()
                     associations_created += 1
-                except Exception as exc:
+                except (requests.HTTPError, requests.RequestException) as exc:
                     log.warning("Association failed for contact %s: %s", hs_contact_id, exc)
 
         log.info(

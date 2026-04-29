@@ -75,7 +75,7 @@ def get_next_run_time(cron_str: str, tz_name: str = "America/New_York") -> Optio
         tz = pytz.timezone(tz_name)
         base = datetime.now(tz)
         return croniter(cron_str, base).get_next(datetime)
-    except Exception:
+    except (ImportError, ValueError, KeyError):
         return None
 
 

@@ -1,0 +1,26 @@
+{
+  "organization_search": {
+    "industry_keywords": ["E-commerce", "Retail Technology", "B2B Marketplace", "Online Retail"],
+    "employee_ranges": [
+      {"min": 50, "max": 499},
+      {"min": 500, "max": 1999},
+      {"min": 2000, "max": 9999}
+    ],
+    "location_states": ["California", "New York", "Texas", "Florida", "Washington", "Nevada"],
+    "technology_names": ["Shopify", "Klaviyo", "Gorgias", "Salesforce", "Recharge"]
+  },
+  "contact_search": {
+    "persona_titles": [
+      "VP Operations",
+      "Chief Operating Officer",
+      "Director of Operations",
+      "VP eCommerce",
+      "Head of Growth",
+      "Director of Retention"
+    ],
+    "seniority_levels": ["VP", "Director", "C-Suite"]
+  },
+  "exclusions": {"domains": [], "industries": []},
+  "estimated_tam_size": 0,
+  "query_rationale": "E-commerce vertical template — targeting online retail companies 50-9999 employees."
+}

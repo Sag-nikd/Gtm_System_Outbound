@@ -1,0 +1,10 @@
+{
+  "Logistics & Supply Chain": "LOGISTICS_AND_SUPPLY_CHAIN",
+  "Freight Brokerage": "LOGISTICS_AND_SUPPLY_CHAIN",
+  "Fleet Management": "TRANSPORTATION_TRUCKING_RAILROAD",
+  "Last-Mile Delivery": "LOGISTICS_AND_SUPPLY_CHAIN",
+  "Distribution": "WAREHOUSING",
+  "Procurement": "LOGISTICS_AND_SUPPLY_CHAIN",
+  "Manufacturing": "MECHANICAL_OR_INDUSTRIAL_ENGINEERING",
+  "Retail": "RETAIL"
+}

@@ -28,7 +28,7 @@ def _read_csv(path: str) -> List[dict]:
     try:
         with open(path, newline="", encoding="utf-8") as f:
             return [dict(row) for row in csv.DictReader(f)]
-    except Exception as exc:
+    except (OSError, csv.Error) as exc:
         log.warning("Could not read %s: %s", path, exc)
         return []
 

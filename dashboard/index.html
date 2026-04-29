@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GTM Pipeline Dashboard</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f6fa; color: #2d3748; }
+    header { background: #1a202c; color: white; padding: 16px 24px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 1.25rem; font-weight: 600; }
+    header .badge { background: #4a5568; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    .grid { display: grid; gap: 16px; }
+    .grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    @media (max-width: 768px) { .grid-2, .grid-4 { grid-template-columns: 1fr; } }
+    .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .card h2 { font-size: 0.875rem; color: #718096; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+    .stat-value { font-size: 2rem; font-weight: 700; color: #2d3748; }
+    .stat-sub { font-size: 0.8rem; color: #718096; margin-top: 4px; }
+    .badge-green { background: #c6f6d5; color: #22543d; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; }
+    .badge-yellow { background: #fefcbf; color: #744210; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; }
+    .badge-red { background: #fed7d7; color: #742a2a; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; }
+    .badge-gray { background: #e2e8f0; color: #4a5568; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; }
+    .section-title { font-size: 1rem; font-weight: 600; margin: 24px 0 12px; color: #2d3748; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    th { text-align: left; padding: 10px 12px; background: #f7fafc; border-bottom: 2px solid #e2e8f0; font-weight: 600; color: #4a5568; }
+    td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; }
+    tr:hover td { background: #f7fafc; }
+    .progress-bar { height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+    .error-box { background: #fff5f5; border: 1px solid #fc8181; border-radius: 8px; padding: 16px; color: #742a2a; }
+    .loading { text-align: center; padding: 40px; color: #718096; }
+    .refresh-btn { background: #4299e1; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.875rem; }
+    .refresh-btn:hover { background: #3182ce; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5050' : '';
+
+    function fetchJSON(path) {
+      if (API_BASE) {
+        return fetch(`${API_BASE}${path}`).then(r => r.json());
+      }
+      // Fallback: try to load from outputs/ directory directly (file:// mode)
+      return Promise.reject(new Error('API server not running. Start dashboard_api.py to load live data.'));
+    }
+
+    function StatusBadge({ status }) {
+      const cls = { completed: 'badge-green', failed: 'badge-red', running: 'badge-yellow', skipped: 'badge-gray' }[status] || 'badge-gray';
+      return <span className={cls}>{status}</span>;
+    }
+
+    function HealthBadge({ status }) {
+      const cls = { healthy: 'badge-green', warning: 'badge-yellow', critical: 'badge-red' }[status] || 'badge-gray';
+      return <span className={cls}>{status}</span>;
+    }
+
+    function StatCard({ title, value, sub }) {
+      return (
+        <div className="card">
+          <h2>{title}</h2>
+          <div className="stat-value">{value ?? '—'}</div>
+          {sub && <div className="stat-sub">{sub}</div>}
+        </div>
+      );
+    }
+
+    function PipelineStages({ stages }) {
+      if (!stages?.length) return <p style={{color:'#718096'}}>No stage data available</p>;
+      return (
+        <table>
+          <thead><tr><th>Stage</th><th>Records</th><th>Status</th></tr></thead>
+          <tbody>
+            {stages.map(s => (
+              <tr key={s.name}>
+                <td>{s.name}</td>
+                <td>{s.record_count?.toLocaleString() ?? '—'}</td>
+                <td><StatusBadge status={s.status} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      );
+    }
+
+    function CampaignTable({ campaigns }) {
+      if (!campaigns?.length) return <p style={{color:'#718096'}}>No campaign data available</p>;
+      return (
+        <table>
+          <thead>
+            <tr>
+              <th>Campaign</th>
+              <th>Sent</th>
+              <th>Open Rate</th>
+              <th>Click Rate</th>
+              <th>Bounce Rate</th>
+              <th>Health</th>
+            </tr>
+          </thead>
+          <tbody>
+            {campaigns.map((c, i) => (
+              <tr key={i}>
+                <td>{c.campaign_name}</td>
+                <td>{c.volume?.toLocaleString() ?? '—'}</td>
+                <td>{c.open_rate != null ? `${(c.open_rate * 100).toFixed(1)}%` : '—'}</td>
+                <td>{c.click_rate != null ? `${(c.click_rate * 100).toFixed(1)}%` : '—'}</td>
+                <td>{c.bounce_rate != null ? `${(c.bounce_rate * 100).toFixed(2)}%` : '—'}</td>
+                <td><HealthBadge status={c.health_status} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      );
+    }
+
+    function TierChart({ tiersData }) {
+      const canvasRef = useRef(null);
+      const chartRef = useRef(null);
+
+      useEffect(() => {
+        if (!tiersData || !canvasRef.current) return;
+        if (chartRef.current) chartRef.current.destroy();
+        chartRef.current = new Chart(canvasRef.current, {
+          type: 'doughnut',
+          data: {
+            labels: Object.keys(tiersData),
+            datasets: [{
+              data: Object.values(tiersData),
+              backgroundColor: ['#4299e1', '#48bb78', '#ed8936', '#e53e3e'],
+              borderWidth: 2,
+              borderColor: '#fff',
+            }],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom', labels: { padding: 12, font: { size: 12 } } } },
+          },
+        });
+        return () => { if (chartRef.current) chartRef.current.destroy(); };
+      }, [tiersData]);
+
+      return <canvas ref={canvasRef} />;
+    }
+
+    function FunnelChart({ funnel }) {
+      const canvasRef = useRef(null);
+      const chartRef = useRef(null);
+
+      useEffect(() => {
+        if (!funnel || !canvasRef.current) return;
+        if (chartRef.current) chartRef.current.destroy();
+        chartRef.current = new Chart(canvasRef.current, {
+          type: 'bar',
+          data: {
+            labels: funnel.map(f => f.stage),
+            datasets: [{
+              label: 'Records',
+              data: funnel.map(f => f.count),
+              backgroundColor: '#4299e1',
+              borderRadius: 4,
+            }],
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } },
+          },
+        });
+        return () => { if (chartRef.current) chartRef.current.destroy(); };
+      }, [funnel]);
+
+      return <canvas ref={canvasRef} />;
+    }
+
+    function App() {
+      const [data, setData] = useState(null);
+      const [error, setError] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [lastRefresh, setLastRefresh] = useState(null);
+
+      const load = () => {
+        setLoading(true);
+        setError(null);
+        fetchJSON('/api/summary')
+          .then(d => { setData(d); setLastRefresh(new Date().toLocaleTimeString()); })
+          .catch(err => setError(err.message))
+          .finally(() => setLoading(false));
+      };
+
+      useEffect(() => { load(); }, []);
+
+      if (loading) return <div className="loading">Loading pipeline data...</div>;
+
+      return (
+        <div>
+          <header>
+            <h1>GTM Pipeline Dashboard</h1>
+            <span className="badge">Live</span>
+            <div style={{marginLeft:'auto', display:'flex', alignItems:'center', gap:'12px'}}>
+              {lastRefresh && <span style={{fontSize:'0.75rem', color:'#a0aec0'}}>Updated {lastRefresh}</span>}
+              <button className="refresh-btn" onClick={load}>Refresh</button>
+            </div>
+          </header>
+
+          <div className="container">
+            {error && (
+              <div className="error-box" style={{marginBottom:16}}>
+                <strong>Could not load data:</strong> {error}
+                <p style={{marginTop:8, fontSize:'0.85rem'}}>
+                  Start the API server: <code>python scripts/dashboard_api.py</code>
+                </p>
+              </div>
+            )}
+
+            {data && (
+              <>
+                <div className="grid grid-4" style={{marginBottom:16}}>
+                  <StatCard title="Companies Scored" value={data.summary?.companies_scored?.toLocaleString()} sub="This run" />
+                  <StatCard title="Contacts Discovered" value={data.summary?.contacts_discovered?.toLocaleString()} sub="Approved accounts" />
+                  <StatCard title="Emails Approved" value={data.summary?.emails_approved?.toLocaleString()} sub="Ready for outreach" />
+                  <StatCard title="Campaigns Monitored" value={data.summary?.campaigns_monitored} sub={data.summary?.campaigns_critical ? `${data.summary.campaigns_critical} critical` : 'All healthy'} />
+                </div>
+
+                <div className="grid grid-2">
+                  <div className="card">
+                    <h2>ICP Tier Distribution</h2>
+                    <TierChart tiersData={data.tiers} />
+                  </div>
+                  <div className="card">
+                    <h2>Pipeline Funnel</h2>
+                    <FunnelChart funnel={data.funnel} />
+                  </div>
+                </div>
+
+                <div className="section-title">Last Pipeline Run — Stages</div>
+                <div className="card">
+                  <PipelineStages stages={data.stages} />
+                </div>
+
+                <div className="section-title">Campaign Health</div>
+                <div className="card">
+                  <CampaignTable campaigns={data.campaigns} />
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

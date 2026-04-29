@@ -1,0 +1,29 @@
+{
+  "schedules": {
+    "stage1": {
+      "cron": "0 8 * * 3",
+      "enabled": true,
+      "description": "FinServ prospect sourcing — weekly Wednesdays 8am"
+    },
+    "stage2": {
+      "cron": "0 9 * * 3",
+      "enabled": true,
+      "description": "Contact validation — weekly Wednesdays 9am"
+    },
+    "stage3": {
+      "cron": "0 10 * * 3",
+      "enabled": true,
+      "description": "CRM sync — weekly Wednesdays 10am"
+    },
+    "stage4": {
+      "cron": "0 */6 * * *",
+      "enabled": true,
+      "description": "Campaign monitoring — every 6 hours"
+    }
+  },
+  "defaults": {
+    "timezone": "America/New_York",
+    "retry_attempts": 3,
+    "retry_delay_seconds": 120
+  }
+}

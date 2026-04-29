@@ -1,0 +1,11 @@
+{
+  "Financial Services": "FINANCIAL_SERVICES",
+  "Fintech": "FINANCIAL_SERVICES",
+  "Banking": "BANKING",
+  "Insurance": "INSURANCE",
+  "Asset Management": "INVESTMENT_MANAGEMENT",
+  "Payments Processing": "FINANCIAL_SERVICES",
+  "B2B Payments": "FINANCIAL_SERVICES",
+  "Private Equity": "VENTURE_CAPITAL_PRIVATE_EQUITY",
+  "SaaS": "COMPUTER_SOFTWARE"
+}

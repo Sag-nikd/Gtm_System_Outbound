@@ -1,0 +1,29 @@
+{
+  "schedules": {
+    "stage1": {
+      "cron": "0 7 * * 1",
+      "enabled": true,
+      "description": "SaaS prospect sourcing — weekly Mondays 7am"
+    },
+    "stage2": {
+      "cron": "0 8 * * 1",
+      "enabled": true,
+      "description": "Contact validation — weekly Mondays 8am"
+    },
+    "stage3": {
+      "cron": "0 9 * * 1",
+      "enabled": true,
+      "description": "CRM sync — weekly Mondays 9am"
+    },
+    "stage4": {
+      "cron": "0 8 * * *",
+      "enabled": true,
+      "description": "Campaign monitoring — daily 8am"
+    }
+  },
+  "defaults": {
+    "timezone": "America/New_York",
+    "retry_attempts": 2,
+    "retry_delay_seconds": 60
+  }
+}

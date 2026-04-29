@@ -1,0 +1,29 @@
+{
+  "schedules": {
+    "stage1": {
+      "cron": "0 7 * * 4",
+      "enabled": true,
+      "description": "Logistics prospect sourcing — weekly Thursdays 7am"
+    },
+    "stage2": {
+      "cron": "0 8 * * 4",
+      "enabled": true,
+      "description": "Contact validation — weekly Thursdays 8am"
+    },
+    "stage3": {
+      "cron": "0 9 * * 4",
+      "enabled": true,
+      "description": "CRM sync — weekly Thursdays 9am"
+    },
+    "stage4": {
+      "cron": "0 */4 * * *",
+      "enabled": true,
+      "description": "Campaign monitoring — every 4 hours"
+    }
+  },
+  "defaults": {
+    "timezone": "America/Chicago",
+    "retry_attempts": 2,
+    "retry_delay_seconds": 90
+  }
+}

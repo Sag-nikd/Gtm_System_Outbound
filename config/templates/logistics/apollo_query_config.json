@@ -1,0 +1,26 @@
+{
+  "organization_search": {
+    "industry_keywords": ["Logistics", "Supply Chain", "Freight", "Transportation", "Distribution"],
+    "employee_ranges": [
+      {"min": 75, "max": 499},
+      {"min": 500, "max": 2999},
+      {"min": 3000, "max": 49999}
+    ],
+    "location_states": ["Texas", "Illinois", "Ohio", "Georgia", "Tennessee", "California", "Florida"],
+    "technology_names": ["Microsoft Dynamics 365", "Salesforce", "Oracle", "SAP", "NetSuite"]
+  },
+  "contact_search": {
+    "persona_titles": [
+      "VP Operations",
+      "Director of Operations",
+      "Chief Operating Officer",
+      "VP Logistics",
+      "Director of Supply Chain",
+      "Head of Fleet Operations"
+    ],
+    "seniority_levels": ["VP", "Director", "C-Suite"]
+  },
+  "exclusions": {"domains": [], "industries": []},
+  "estimated_tam_size": 0,
+  "query_rationale": "Logistics vertical template — targeting freight, fleet, and supply chain companies 75-49999 employees."
+}

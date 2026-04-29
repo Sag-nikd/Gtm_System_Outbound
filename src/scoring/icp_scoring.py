@@ -139,7 +139,7 @@ def score_companies(companies: list, rules: dict) -> list:
     for company in companies:
         try:
             results.append(score_company(company, rules))
-        except Exception as exc:
+        except (AttributeError, KeyError, TypeError, ValueError) as exc:
             failures += 1
             cid = company.get("company_id", "?") if isinstance(company, dict) else "?"
             log.warning("Scoring failed for %s: %s", cid, exc)

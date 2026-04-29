@@ -1,0 +1,9 @@
+{
+  "E-commerce": "RETAIL",
+  "Retail Technology": "RETAIL",
+  "B2B Marketplace": "RETAIL",
+  "Direct-to-Consumer": "RETAIL",
+  "Retail": "RETAIL",
+  "Logistics & Supply Chain": "LOGISTICS_AND_SUPPLY_CHAIN",
+  "SaaS": "COMPUTER_SOFTWARE"
+}

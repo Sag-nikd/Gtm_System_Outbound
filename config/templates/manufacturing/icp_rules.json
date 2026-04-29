@@ -1,0 +1,44 @@
+{
+  "weights": {
+    "industry_fit": 25,
+    "volume_metric": 25,
+    "employee_count": 15,
+    "growth_signal": 15,
+    "hiring_signal": 10,
+    "tech_stack_signal": 10
+  },
+  "tiers": {
+    "tier_1": {"min": 80, "max": 100, "label": "Tier 1"},
+    "tier_2": {"min": 60, "max": 79, "label": "Tier 2"},
+    "tier_3": {"min": 40, "max": 59, "label": "Tier 3"},
+    "disqualified": {"min": 0, "max": 39, "label": "Disqualified"}
+  },
+  "industry_scores": {
+    "Manufacturing": 1.0,
+    "Industrial Equipment": 1.0,
+    "Precision Parts": 1.0,
+    "Automotive Manufacturing": 0.75,
+    "Consumer Goods Manufacturing": 0.75,
+    "Logistics & Supply Chain": 0.5,
+    "Construction": 0.5,
+    "B2B Technology": 0.25,
+    "default": 0.0
+  },
+  "volume_thresholds": {
+    "high": {"min": 700000, "multiplier": 1.0},
+    "mid": {"min": 200000, "multiplier": 0.75},
+    "low": {"min": 60000, "multiplier": 0.25},
+    "none": {"min": 0, "multiplier": 0.0}
+  },
+  "employee_count_thresholds": {
+    "high": {"min": 2000, "multiplier": 1.0},
+    "mid": {"min": 500, "multiplier": 0.75},
+    "low": {"min": 100, "multiplier": 0.25},
+    "none": {"min": 0, "multiplier": 0.0}
+  },
+  "tech_stack_scores": {
+    "full": ["SAP", "Microsoft Dynamics 365", "Oracle", "Salesforce", "Infor"],
+    "partial_multiplier": 0.5,
+    "none": ["Legacy ERP", "Unknown"]
+  }
+}

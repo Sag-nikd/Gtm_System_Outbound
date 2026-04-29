@@ -17,6 +17,22 @@ services:
         condition: service_healthy
         required: false
 
+  dashboard:
+    build: .
+    command: python scripts/dashboard_api.py --host 0.0.0.0 --port 5050
+    env_file:
+      - .env
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      - ./outputs:/app/outputs
+      - ./dashboard:/app/dashboard
+    ports:
+      - "${DASHBOARD_PORT:-5050}:5050"
+    restart: unless-stopped
+    profiles:
+      - dashboard
+
   db:
     image: postgres:15-alpine
     environment:

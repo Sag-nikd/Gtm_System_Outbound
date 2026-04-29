@@ -1,0 +1,29 @@
+{
+  "schedules": {
+    "stage1": {
+      "cron": "0 7 1 * *",
+      "enabled": true,
+      "description": "Manufacturing prospect sourcing — monthly on the 1st at 7am"
+    },
+    "stage2": {
+      "cron": "0 8 1 * *",
+      "enabled": true,
+      "description": "Contact validation — monthly on the 1st at 8am"
+    },
+    "stage3": {
+      "cron": "0 9 1 * *",
+      "enabled": true,
+      "description": "CRM sync — monthly on the 1st at 9am"
+    },
+    "stage4": {
+      "cron": "0 8 * * *",
+      "enabled": true,
+      "description": "Campaign monitoring — daily 8am"
+    }
+  },
+  "defaults": {
+    "timezone": "America/Detroit",
+    "retry_attempts": 3,
+    "retry_delay_seconds": 180
+  }
+}

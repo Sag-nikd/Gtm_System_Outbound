@@ -30,15 +30,15 @@
     }
   },
   "industry_scores": {
-    "Managed Care": 1.0,
-    "Health Plan": 1.0,
-    "Provider": 1.0,
-    "Financial Services": 0.0,
-    "Retail": 0.0,
-    "Healthcare Technology": 0.0,
-    "Logistics": 0.0,
-    "Education": 0.0,
-    "Energy": 0.0,
+    "E-commerce": 1.0,
+    "Financial Services": 1.0,
+    "B2B Technology": 0.8,
+    "SaaS": 0.8,
+    "Retail Technology": 0.6667,
+    "Logistics & Supply Chain": 0.5,
+    "Manufacturing": 0.5,
+    "Energy & Utilities": 0.0,
+    "Education Technology": 0.0,
     "default": 0.0
   },
   "volume_thresholds": {
@@ -48,11 +48,11 @@
     },
     "mid": {
       "min": 250000,
-      "multiplier": 1.0
+      "multiplier": 0.8
     },
     "low": {
       "min": 50000,
-      "multiplier": 0.1
+      "multiplier": 0.9
     },
     "none": {
       "min": 0,
@@ -66,11 +66,11 @@
     },
     "mid": {
       "min": 500,
-      "multiplier": 0.75
+      "multiplier": 0.93
     },
     "low": {
       "min": 100,
-      "multiplier": 0.1
+      "multiplier": 1.0
     },
     "none": {
       "min": 0,
@@ -79,17 +79,19 @@
   },
   "tech_stack_scores": {
     "full": [
-      "Epic",
       "HubSpot",
       "Microsoft Dynamics 365",
+      "SAP",
       "Salesforce",
-      "Twilio"
+      "Shopify",
+      "Stripe"
     ],
     "partial_multiplier": 0.5,
     "none": [
-      "SAP",
-      "Shopify",
-      "Unknown"
+      "GitHub",
+      "Looker",
+      "NetSuite",
+      "Oracle"
     ]
   }
 }

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import os
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -11,27 +13,22 @@ log = get_logger(__name__)
 
 _BASE_URL = "https://api.hubapi.com"
 
-# HubSpot native `industry` property requires exact enum values
-# Map GTM industry names to the closest valid HubSpot option
-_INDUSTRY_MAP: Dict[str, str] = {
-    "Managed Care": "HOSPITAL_HEALTH_CARE",
-    "Health Plan": "INSURANCE",
-    "Healthcare Tech": "HOSPITAL_HEALTH_CARE",
-    "Healthcare SaaS": "HOSPITAL_HEALTH_CARE",
-    "Hospital": "HOSPITAL_HEALTH_CARE",
-    "Medical": "MEDICAL_PRACTICE",
-    "Financial Services": "FINANCIAL_SERVICES",
-    "Banking": "BANKING",
-    "Insurance": "INSURANCE",
-    "Retail": "RETAIL",
-    "Technology": "INFORMATION_TECHNOLOGY_AND_SERVICES",
-    "SaaS": "COMPUTER_SOFTWARE",
-    "B2B SaaS": "COMPUTER_SOFTWARE",
-    "Software": "COMPUTER_SOFTWARE",
-    "Consulting": "MANAGEMENT_CONSULTING",
-    "Education": "EDUCATION_MANAGEMENT",
-    "Government": "GOVERNMENT_ADMINISTRATION",
-}
+_INDUSTRY_MAP_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))),
+    "config", "crm", "hubspot_industry_map.json",
+)
+
+
+def _load_industry_map() -> Dict[str, str]:
+    try:
+        with open(_INDUSTRY_MAP_PATH, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, json.JSONDecodeError) as exc:
+        log.warning("Could not load hubspot_industry_map.json: %s", exc)
+        return {}
+
+
+_INDUSTRY_MAP: Dict[str, str] = _load_industry_map()
 
 # Map GTM icp_tier values to HubSpot enumeration option values
 _TIER_VALUE_MAP = {
@@ -210,7 +207,7 @@ class HubSpotSyncClient:
                 for r in resp.get("results", [])
                 if r["properties"].get(prop)
             }
-        except Exception as exc:
+        except (requests.HTTPError, requests.RequestException, KeyError, ValueError) as exc:
             log.warning("HubSpot batch search failed: %s", exc)
             return {}
 
@@ -310,7 +307,7 @@ class HubSpotSyncClient:
                     try:
                         self.associate_contact_to_company(hs_contact_id, hs_co_id)
                         associated += 1
-                    except Exception as exc:
+                    except (requests.HTTPError, requests.RequestException) as exc:
                         name = f"{ct.get('first_name', '')} {ct.get('last_name', '')}".strip()
                         log.warning("Association failed for %s: %s", name, exc)
 
