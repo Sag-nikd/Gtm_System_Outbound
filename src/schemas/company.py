@@ -17,8 +17,8 @@ class Company(BaseModel):
     employee_count: int
     revenue_range: str
     state: str
-    medicaid_members: int
-    medicare_members: int
+    primary_volume_metric: int
+    secondary_volume_metric: int
     growth_signal: bool
     hiring_signal: bool
     tech_stack_signal: str
@@ -28,9 +28,9 @@ class Company(BaseModel):
     # Populated after ICP scoring
     icp_score: Optional[float] = None
     icp_tier: Optional[str] = None
-    total_member_volume: Optional[int] = None
+    total_volume: Optional[int] = None
     industry_score: Optional[float] = None
-    member_volume_score: Optional[float] = None
+    volume_score: Optional[float] = None
     employee_count_score: Optional[float] = None
     growth_signal_score: Optional[float] = None
     hiring_signal_score: Optional[float] = None

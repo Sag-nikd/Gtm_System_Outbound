@@ -12,7 +12,7 @@ log = get_logger(__name__)
 
 _DEFAULT_WEIGHTS = {
     "industry_fit": 25,
-    "member_volume": 25,
+    "volume_metric": 25,
     "employee_count": 15,
     "growth_signal": 15,
     "hiring_signal": 10,
@@ -58,8 +58,8 @@ def _percentile(values: List[float], p: float) -> float:
     return sorted_v[lo] + frac * (sorted_v[hi] - sorted_v[lo])
 
 
-def _member_volume_thresholds(profile: ICPProfile) -> dict:
-    if not profile.member_volume_breakdown:
+def _volume_thresholds(profile: ICPProfile) -> dict:
+    if not profile.volume_breakdown:
         return {
             "high": {"min": 750000, "multiplier": 1.0},
             "mid": {"min": 250000, "multiplier": 0.7},
@@ -68,7 +68,7 @@ def _member_volume_thresholds(profile: ICPProfile) -> dict:
         }
 
     # Use index as proxy for multiplier, ordered by min threshold
-    segs = sorted(profile.member_volume_breakdown, key=lambda s: s.index, reverse=True)
+    segs = sorted(profile.volume_breakdown, key=lambda s: s.index, reverse=True)
     top_index = segs[0].index if segs else 1.0
 
     # Extract band mins from segment names
@@ -154,14 +154,14 @@ def _tech_stack_scores(profile: ICPProfile) -> dict:
 def _calculate_weights(profile: ICPProfile) -> dict:
     base = dict(_DEFAULT_WEIGHTS)
 
-    # If no member volume data, zero out member_volume weight
-    if not profile.member_volume_breakdown:
-        zeroed = base.pop("member_volume")
+    # If no volume data, zero out volume_metric weight
+    if not profile.volume_breakdown:
+        zeroed = base.pop("volume_metric")
         # redistribute proportionally
         remaining_total = sum(base.values())
         for k in base:
             base[k] = round(base[k] + zeroed * _safe_div(base[k], remaining_total), 4)
-        base["member_volume"] = 0
+        base["volume_metric"] = 0
 
     # Normalize to exactly 100
     total = sum(base.values())
@@ -189,7 +189,7 @@ def generate_icp_rules(
         "weights": int_weights,
         "tiers": _DEFAULT_TIERS,
         "industry_scores": _industry_scores(profile),
-        "member_volume_thresholds": _member_volume_thresholds(profile),
+        "volume_thresholds": _volume_thresholds(profile),
         "employee_count_thresholds": _employee_count_thresholds(profile),
         "tech_stack_scores": _tech_stack_scores(profile),
     }

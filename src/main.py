@@ -82,7 +82,7 @@ def run_company_pipeline(apollo, clay) -> List[dict]:
             pd.DataFrame(companies)[[
                 "company_id", "company_name", "website", "domain", "industry",
                 "employee_count", "revenue_range", "state",
-                "medicaid_members", "medicare_members",
+                "primary_volume_metric", "secondary_volume_metric",
                 "growth_signal", "hiring_signal", "tech_stack_signal",
                 "ingestion_source", "ingestion_status",
             ]],
@@ -105,7 +105,7 @@ def run_company_pipeline(apollo, clay) -> List[dict]:
         _save(
             pd.DataFrame(enriched)[[
                 "company_id", "company_name", "domain", "industry", "employee_count",
-                "state", "medicaid_members", "medicare_members",
+                "state", "primary_volume_metric", "secondary_volume_metric",
                 "growth_signal", "hiring_signal", "tech_stack_signal",
                 "enrichment_status", "enrichment_source",
                 "recommended_personas", "enriched_signal_summary",
@@ -115,8 +115,8 @@ def run_company_pipeline(apollo, clay) -> List[dict]:
         _save(
             pd.DataFrame(enriched)[[
                 "company_id", "company_name", "domain", "industry", "employee_count",
-                "state", "total_member_volume",
-                "industry_score", "member_volume_score", "employee_count_score",
+                "state", "total_volume",
+                "industry_score", "volume_score", "employee_count_score",
                 "growth_signal_score", "hiring_signal_score", "tech_stack_score",
                 "icp_score", "icp_tier", "score_reason", "tier_reason",
             ]],

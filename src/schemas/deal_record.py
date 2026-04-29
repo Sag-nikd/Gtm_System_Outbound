@@ -16,8 +16,8 @@ class DealRecord(BaseModel):
     revenue_range: Optional[str] = None
     state: Optional[str] = None
     country: Optional[str] = "US"
-    medicaid_members: Optional[int] = None
-    medicare_members: Optional[int] = None
+    primary_volume_metric: Optional[int] = None
+    secondary_volume_metric: Optional[int] = None
     tech_stack: Optional[str] = None
     deal_value: Optional[float] = None
     deal_cycle_days: Optional[int] = None
@@ -51,7 +51,7 @@ class TAMRecord(BaseModel):
     employee_count: Optional[int] = None
     state: Optional[str] = None
     country: Optional[str] = "US"
-    medicaid_members: Optional[int] = None
-    medicare_members: Optional[int] = None
+    primary_volume_metric: Optional[int] = None
+    secondary_volume_metric: Optional[int] = None
     tech_stack: Optional[str] = None
     is_current_customer: Optional[bool] = False

@@ -29,9 +29,9 @@ def test_hiring_signal_adds_10_points(icp_rules, managed_care_company):
     assert result["hiring_signal_score"] == 0.0
 
 
-def test_total_member_volume_calculated(icp_rules, managed_care_company):
+def test_total_volume_calculated(icp_rules, managed_care_company):
     result = score_company(managed_care_company, icp_rules)
-    assert result["total_member_volume"] == 900_000
+    assert result["total_volume"] == 900_000
 
 
 def test_tech_stack_full_points(icp_rules, managed_care_company):
@@ -73,7 +73,7 @@ def test_score_companies_processes_list(icp_rules, managed_care_company, retail_
 def test_score_reason_populated(icp_rules, managed_care_company):
     result = score_company(managed_care_company, icp_rules)
     assert "industry=" in result["score_reason"]
-    assert "total_members=" in result["score_reason"]
+    assert "total_volume=" in result["score_reason"]
 
 
 def test_tier_reason_populated(icp_rules, managed_care_company):
@@ -81,14 +81,14 @@ def test_tier_reason_populated(icp_rules, managed_care_company):
     assert "Tier 1" in result["tier_reason"]
 
 
-def test_mid_member_volume_tier2(icp_rules):
-    # Managed Care(25) + mid members 300k(17.5) + mid employees 500(10.5) + growth(15) = 68 -> Tier 2
+def test_mid_volume_metric_tier2(icp_rules):
+    # Managed Care(25) + mid volume 300k(17.5) + mid employees 500(10.5) + growth(15) = 68 -> Tier 2
     company = {
         "company_id": "C002",
         "industry": "Managed Care",
         "employee_count": 500,
-        "medicaid_members": 300_000,
-        "medicare_members": 0,
+        "primary_volume_metric": 300_000,
+        "secondary_volume_metric": 0,
         "growth_signal": True,
         "hiring_signal": False,
         "tech_stack_signal": "Unknown",

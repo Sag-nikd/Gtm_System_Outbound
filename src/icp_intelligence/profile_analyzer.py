@@ -133,22 +133,22 @@ def analyze_icp(
     geo_raw = _build_segments(deals, lambda d: d.get("state") or None, None, overall_cr)
     geo_breakdown = [GeoSegment(**s) for s in geo_raw]
 
-    # member volume breakdown — only if any record has member data
-    has_member_data = any(
-        d.get("medicaid_members") is not None or d.get("medicare_members") is not None
+    # volume breakdown — only if any record has volume data
+    has_volume_data = any(
+        d.get("primary_volume_metric") is not None or d.get("secondary_volume_metric") is not None
         for d in deals
     )
-    member_volume_breakdown = []
-    if has_member_data:
+    volume_breakdown = []
+    if has_volume_data:
         def member_key(d):
-            mc = d.get("medicaid_members") or 0
-            me = d.get("medicare_members") or 0
+            pv = d.get("primary_volume_metric") or 0
+            sv = d.get("secondary_volume_metric") or 0
             try:
-                return _member_band(int(mc) + int(me))
+                return _member_band(int(pv) + int(sv))
             except (TypeError, ValueError):
                 return None
         vol_raw = _build_segments(deals, member_key, None, overall_cr)
-        member_volume_breakdown = [VolumeSegment(**s) for s in vol_raw]
+        volume_breakdown = [VolumeSegment(**s) for s in vol_raw]
 
     # tech stack breakdown
     tech_raw = _build_segments(deals, lambda d: d.get("tech_stack") or None, None, overall_cr)
@@ -214,7 +214,7 @@ def analyze_icp(
         industry_breakdown=industry_breakdown,
         employee_size_breakdown=employee_size_breakdown,
         geo_breakdown=geo_breakdown,
-        member_volume_breakdown=member_volume_breakdown,
+        volume_breakdown=volume_breakdown,
         tech_stack_breakdown=tech_stack_breakdown,
         top_converting_persona=top_converting_persona,
         best_source_channel=best_source_channel,

@@ -20,10 +20,10 @@ def _score_industry(company: dict, rules: dict) -> tuple[float, str]:
     return round(points, 2), reason
 
 
-def _score_member_volume(company: dict, rules: dict) -> tuple[float, str]:
-    total = company.get("medicaid_members", 0) + company.get("medicare_members", 0)
-    weight = rules["weights"]["member_volume"]
-    thresholds = rules["member_volume_thresholds"]
+def _score_volume(company: dict, rules: dict) -> tuple[float, str]:
+    total = company.get("primary_volume_metric", 0) + company.get("secondary_volume_metric", 0)
+    weight = rules["weights"]["volume_metric"]
+    thresholds = rules["volume_thresholds"]
 
     if total >= thresholds["high"]["min"]:
         multiplier, band = thresholds["high"]["multiplier"], "high"
@@ -35,7 +35,7 @@ def _score_member_volume(company: dict, rules: dict) -> tuple[float, str]:
         multiplier, band = thresholds["none"]["multiplier"], "none"
 
     points = weight * multiplier
-    reason = f"total_members={total:,} → {band} band ({int(multiplier*100)}%)"
+    reason = f"total_volume={total:,} → {band} band ({int(multiplier*100)}%)"
     return round(points, 2), reason
 
 
@@ -102,20 +102,20 @@ def _assign_tier(score: float, rules: dict) -> str:
 
 def score_company(company: dict, rules: dict) -> dict:
     industry_pts, industry_reason = _score_industry(company, rules)
-    member_pts, member_reason = _score_member_volume(company, rules)
+    volume_pts, volume_reason = _score_volume(company, rules)
     employee_pts, employee_reason = _score_employee_count(company, rules)
     growth_pts, growth_reason = _score_growth_signal(company, rules)
     hiring_pts, hiring_reason = _score_hiring_signal(company, rules)
     tech_pts, tech_reason = _score_tech_stack(company, rules)
 
-    total = industry_pts + member_pts + employee_pts + growth_pts + hiring_pts + tech_pts
+    total = industry_pts + volume_pts + employee_pts + growth_pts + hiring_pts + tech_pts
     tier = _assign_tier(total, rules)
 
-    company["total_member_volume"] = (
-        company.get("medicaid_members", 0) + company.get("medicare_members", 0)
+    company["total_volume"] = (
+        company.get("primary_volume_metric", 0) + company.get("secondary_volume_metric", 0)
     )
     company["industry_score"] = industry_pts
-    company["member_volume_score"] = member_pts
+    company["volume_score"] = volume_pts
     company["employee_count_score"] = employee_pts
     company["growth_signal_score"] = growth_pts
     company["hiring_signal_score"] = hiring_pts
@@ -123,7 +123,7 @@ def score_company(company: dict, rules: dict) -> dict:
     company["icp_score"] = round(total, 2)
     company["icp_tier"] = tier
     company["score_reason"] = " | ".join([
-        industry_reason, member_reason, employee_reason,
+        industry_reason, volume_reason, employee_reason,
         growth_reason, hiring_reason, tech_reason
     ])
     company["tier_reason"] = f"score={total:.1f} → {tier}"

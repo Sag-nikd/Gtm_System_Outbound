@@ -1,7 +1,7 @@
 {
   "weights": {
     "industry_fit": 25,
-    "member_volume": 25,
+    "volume_metric": 25,
     "employee_count": 15,
     "growth_signal": 15,
     "hiring_signal": 10,
@@ -41,7 +41,7 @@
     "Energy": 0.0,
     "default": 0.0
   },
-  "member_volume_thresholds": {
+  "volume_thresholds": {
     "high": {
       "min": 750000,
       "multiplier": 1.0

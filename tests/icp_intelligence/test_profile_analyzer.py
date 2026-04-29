@@ -103,15 +103,15 @@ def test_avg_deal_value_zero_when_no_values():
     assert profile.avg_deal_value == 0.0
 
 
-# ── (h) No medicaid_members → member_volume_breakdown is empty ───────────────
+# ── (h) No primary_volume_metric → volume_breakdown is empty ───────────────
 
-def test_member_volume_breakdown_empty_when_no_member_data():
+def test_volume_breakdown_empty_when_no_member_data():
     from src.icp_intelligence.profile_analyzer import analyze_icp
     deals = [
         {"company_name": "A", "industry": "Managed Care", "employee_count": 1000, "deal_stage": "closed_won", "domain": "a.com"},
     ]
     profile = analyze_icp(deals)
-    assert profile.member_volume_breakdown == []
+    assert profile.volume_breakdown == []
 
 
 # ── (i) icp_summary mentions top industry name ────────────────────────────────

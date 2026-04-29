@@ -6,7 +6,7 @@ def icp_rules():
     return {
         "weights": {
             "industry_fit": 25,
-            "member_volume": 25,
+            "volume_metric": 25,
             "employee_count": 15,
             "growth_signal": 15,
             "hiring_signal": 10,
@@ -25,7 +25,7 @@ def icp_rules():
             "Provider": 0.6,
             "default": 0.0,
         },
-        "member_volume_thresholds": {
+        "volume_thresholds": {
             "high": {"min": 750000, "multiplier": 1.0},
             "mid":  {"min": 250000, "multiplier": 0.7},
             "low":  {"min": 50000,  "multiplier": 0.4},
@@ -52,8 +52,8 @@ def managed_care_company():
         "company_name": "Test Health Plan",
         "industry": "Managed Care",
         "employee_count": 5000,
-        "medicaid_members": 800000,
-        "medicare_members": 100000,
+        "primary_volume_metric": 800000,
+        "secondary_volume_metric": 100000,
         "growth_signal": True,
         "hiring_signal": True,
         "tech_stack_signal": "Salesforce",
@@ -67,8 +67,8 @@ def retail_company():
         "company_name": "Test Retail",
         "industry": "Retail",
         "employee_count": 50,
-        "medicaid_members": 0,
-        "medicare_members": 0,
+        "primary_volume_metric": 0,
+        "secondary_volume_metric": 0,
         "growth_signal": False,
         "hiring_signal": False,
         "tech_stack_signal": "Unknown",

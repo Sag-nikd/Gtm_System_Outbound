@@ -26,13 +26,13 @@ def _make_simple_profile():
     deals = [
         {"company_name": "A", "industry": "Managed Care", "employee_count": 2000, "deal_stage": "closed_won",
          "domain": "a.com", "deal_value": 100000, "tech_stack": "Salesforce",
-         "medicaid_members": 500000, "medicare_members": 50000},
+         "primary_volume_metric": 500000, "secondary_volume_metric": 50000},
         {"company_name": "B", "industry": "Managed Care", "employee_count": 1500, "deal_stage": "closed_won",
          "domain": "b.com", "deal_value": 120000, "tech_stack": "HubSpot",
-         "medicaid_members": 300000, "medicare_members": 30000},
+         "primary_volume_metric": 300000, "secondary_volume_metric": 30000},
         {"company_name": "C", "industry": "Financial Services", "employee_count": 200, "deal_stage": "closed_lost",
          "domain": "c.com", "loss_reason": "not_our_market", "tech_stack": "Unknown",
-         "medicaid_members": 0, "medicare_members": 0},
+         "primary_volume_metric": 0, "secondary_volume_metric": 0},
     ]
     return analyze_icp(deals)
 
@@ -44,7 +44,7 @@ def test_generate_rules_has_all_required_keys():
     profile = _make_profile()
     rules = generate_icp_rules(profile)
     for key in ("weights", "tiers", "industry_scores",
-                 "member_volume_thresholds", "employee_count_thresholds", "tech_stack_scores"):
+                 "volume_thresholds", "employee_count_thresholds", "tech_stack_scores"):
         assert key in rules, f"Missing key: {key}"
 
 
@@ -77,13 +77,13 @@ def test_unknown_industry_gets_default_score_0():
     assert rules["industry_scores"].get("default", 0.0) == 0.0
 
 
-# ── (e) member_volume_thresholds high >= mid >= low ──────────────────────────
+# ── (e) volume_thresholds high >= mid >= low ──────────────────────────
 
-def test_member_volume_thresholds_ordered():
+def test_volume_thresholds_ordered():
     from src.icp_intelligence.rules_generator import generate_icp_rules
     profile = _make_profile()
     rules = generate_icp_rules(profile)
-    thresholds = rules["member_volume_thresholds"]
+    thresholds = rules["volume_thresholds"]
     assert thresholds["high"]["min"] >= thresholds["mid"]["min"] >= thresholds["low"]["min"]
 
 
@@ -123,7 +123,7 @@ def test_generated_rules_work_with_score_company(tmp_path):
     loaded = load_icp_rules(path)
     company = {
         "company_id": "T001", "company_name": "Test Co", "industry": "Managed Care",
-        "employee_count": 1000, "medicaid_members": 300000, "medicare_members": 50000,
+        "employee_count": 1000, "primary_volume_metric": 300000, "secondary_volume_metric": 50000,
         "growth_signal": True, "hiring_signal": True, "tech_stack_signal": "Salesforce",
     }
     result = score_company(company, loaded)
@@ -156,8 +156,8 @@ def test_no_member_data_weight_redistributed():
          "deal_stage": "closed_won", "domain": "a.com"},
     ]
     profile = analyze_icp(deals)
-    assert profile.member_volume_breakdown == []
+    assert profile.volume_breakdown == []
     rules = generate_icp_rules(profile)
-    assert rules["weights"].get("member_volume", 0) == 0
+    assert rules["weights"].get("volume_metric", 0) == 0
     total = sum(rules["weights"].values())
     assert abs(total - 100) < 0.01

@@ -69,7 +69,7 @@ class ICPProfile(BaseModel):
     industry_breakdown: List[IndustrySegment]
     employee_size_breakdown: List[SizeSegment]
     geo_breakdown: List[GeoSegment]
-    member_volume_breakdown: List[VolumeSegment]
+    volume_breakdown: List[VolumeSegment]
     tech_stack_breakdown: List[TechSegment]
     top_converting_persona: str
     best_source_channel: str

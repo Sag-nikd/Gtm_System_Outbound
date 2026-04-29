@@ -17,7 +17,7 @@ log = get_logger(__name__)
 REQUIRED_FIELDS = [
     "company_id", "company_name", "website", "industry",
     "employee_count", "revenue_range", "state",
-    "medicaid_members", "medicare_members",
+    "primary_volume_metric", "secondary_volume_metric",
     "growth_signal", "hiring_signal", "tech_stack_signal",
 ]
 

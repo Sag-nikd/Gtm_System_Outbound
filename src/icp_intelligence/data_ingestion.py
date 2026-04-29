@@ -52,7 +52,7 @@ def load_deal_data(file_path: str) -> List[dict]:
     seen_domains: dict = {}  # domain -> (index, closed_date)
 
     for i, record in enumerate(raw):
-        record = _coerce_numeric(record, ["employee_count", "medicaid_members", "medicare_members",
+        record = _coerce_numeric(record, ["employee_count", "primary_volume_metric", "secondary_volume_metric",
                                           "deal_value", "deal_cycle_days"])
         try:
             DealRecord(**record)
@@ -103,7 +103,7 @@ def load_tam_data(file_path: str) -> List[dict]:
     raw = _read_file(file_path)
     records = []
     for record in raw:
-        record = _coerce_numeric(record, ["employee_count", "medicaid_members", "medicare_members"])
+        record = _coerce_numeric(record, ["employee_count", "primary_volume_metric", "secondary_volume_metric"])
         try:
             TAMRecord(**record)
         except ValidationError as exc:
