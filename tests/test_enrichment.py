@@ -1,8 +1,8 @@
 import pytest
-from src.enrichment.clay_mock_enrichment import enrich_accounts, _get_enriched_signal_summary
+from src.enrichment.clay_mock_enrichment import enrich_accounts, _get_enriched_signal_summary, PERSONA_MAP, DEFAULT_PERSONAS
 
 
-def _company(industry="Managed Care", tier="Tier 1", **kwargs):
+def _company(industry="B2B Technology", tier="Tier 1", **kwargs):
     base = {
         "company_id": "C001",
         "industry": industry,
@@ -17,24 +17,30 @@ def _company(industry="Managed Care", tier="Tier 1", **kwargs):
 
 # ── Persona mapping ───────────────────────────────────────────────────────────
 
-def test_managed_care_gets_vp_member_engagement():
-    result = enrich_accounts([_company("Managed Care")])
-    assert "VP Member Engagement" in result[0]["recommended_personas"]
+def test_b2b_technology_gets_vp_sales():
+    result = enrich_accounts([_company("B2B Technology")])
+    assert "VP Sales" in result[0]["recommended_personas"]
 
 
-def test_health_plan_gets_correct_personas():
-    result = enrich_accounts([_company("Health Plan")])
-    assert "Director Medicaid Operations" in result[0]["recommended_personas"]
+def test_ecommerce_gets_vp_marketing():
+    result = enrich_accounts([_company("E-commerce")])
+    assert "VP Marketing" in result[0]["recommended_personas"]
 
 
-def test_healthcare_tech_gets_revops_persona():
-    result = enrich_accounts([_company("Healthcare Technology")])
+def test_logistics_gets_revops_persona():
+    result = enrich_accounts([_company("Logistics")])
     assert "Revenue Operations Manager" in result[0]["recommended_personas"]
 
 
 def test_unknown_industry_gets_default_personas():
     result = enrich_accounts([_company("Aerospace")])
     assert result[0]["recommended_personas"] != ""
+
+
+def test_default_personas_used_for_unmapped_industry():
+    result = enrich_accounts([_company("Aerospace")])
+    for persona in DEFAULT_PERSONAS:
+        assert persona in result[0]["recommended_personas"]
 
 
 # ── Contact discovery approval gate ──────────────────────────────────────────

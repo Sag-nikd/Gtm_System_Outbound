@@ -31,6 +31,7 @@ from src.utils.logger import get_logger
 log = get_logger("sync_to_hubspot")
 
 _TOKEN = os.getenv("HUBSPOT_PRIVATE_APP_TOKEN", "")
+_PORTAL_ID = os.getenv("HUBSPOT_PORTAL_ID", "")
 
 
 def main() -> None:
@@ -126,9 +127,10 @@ def main() -> None:
     print(f"  Companies pushed: {created_cos + updated_cos} / {len(enriched)}")
     print(f"  Contacts pushed:  {created_cts + updated_cts} / {len(validated)}")
     print(f"  Associations:     {associated}")
-    print(f"\n  View in HubSpot:")
-    print(f"    Companies: https://app-na2.hubspot.com/contacts/246018862/companies")
-    print(f"    Contacts:  https://app-na2.hubspot.com/contacts/246018862/contacts")
+    if _PORTAL_ID:
+        print(f"\n  View in HubSpot:")
+        print(f"    Companies: https://app.hubspot.com/contacts/{_PORTAL_ID}/companies")
+        print(f"    Contacts:  https://app.hubspot.com/contacts/{_PORTAL_ID}/contacts")
     print("=" * 60 + "\n")
 
 

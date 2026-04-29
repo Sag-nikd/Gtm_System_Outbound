@@ -1,0 +1,40 @@
+{
+  "industry_personas": {
+    "B2B Technology": [
+      "VP Sales",
+      "Revenue Operations Manager",
+      "Chief Technology Officer",
+      "VP Customer Experience"
+    ],
+    "E-commerce": [
+      "VP Marketing",
+      "Revenue Operations Manager",
+      "Chief Technology Officer",
+      "VP Customer Experience"
+    ],
+    "Marketplace": [
+      "VP Sales",
+      "Chief Technology Officer",
+      "Revenue Operations Manager"
+    ],
+    "Financial Services": [
+      "VP Sales",
+      "Chief Executive Officer",
+      "Revenue Operations Manager"
+    ],
+    "Logistics": [
+      "VP Operations",
+      "Chief Technology Officer",
+      "Revenue Operations Manager"
+    ],
+    "Retail": [
+      "VP Marketing",
+      "VP Customer Experience",
+      "Revenue Operations Manager"
+    ]
+  },
+  "default_personas": [
+    "VP Sales",
+    "Revenue Operations Manager"
+  ]
+}

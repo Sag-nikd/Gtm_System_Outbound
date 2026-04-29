@@ -1,0 +1,42 @@
+{
+  "_comment": "Example ICP rules for a B2B SaaS company targeting e-commerce and marketplace platforms.",
+  "weights": {
+    "industry_fit": 30,
+    "volume_metric": 0,
+    "employee_count": 20,
+    "growth_signal": 20,
+    "hiring_signal": 15,
+    "tech_stack_signal": 15
+  },
+  "tiers": {
+    "tier_1": { "min": 80, "max": 100, "label": "Tier 1" },
+    "tier_2": { "min": 60, "max": 79,  "label": "Tier 2" },
+    "tier_3": { "min": 40, "max": 59,  "label": "Tier 3" },
+    "disqualified": { "min": 0, "max": 39, "label": "Disqualified" }
+  },
+  "industry_scores": {
+    "E-commerce": 1.0,
+    "Marketplace": 1.0,
+    "Retail Technology": 0.8,
+    "Logistics": 0.6,
+    "Consumer Goods": 0.4,
+    "default": 0.0
+  },
+  "volume_thresholds": {
+    "high": { "min": 10000000, "multiplier": 1.0 },
+    "mid":  { "min": 1000000,  "multiplier": 0.7 },
+    "low":  { "min": 100000,   "multiplier": 0.3 },
+    "none": { "min": 0,        "multiplier": 0.0 }
+  },
+  "employee_count_thresholds": {
+    "high": { "min": 1000, "multiplier": 1.0 },
+    "mid":  { "min": 200,  "multiplier": 0.7 },
+    "low":  { "min": 50,   "multiplier": 0.3 },
+    "none": { "min": 0,    "multiplier": 0.0 }
+  },
+  "tech_stack_scores": {
+    "full": ["Shopify", "Salesforce", "HubSpot", "Klaviyo"],
+    "partial_multiplier": 0.5,
+    "none": ["Unknown"]
+  }
+}

@@ -5,32 +5,19 @@ Clay-style enrichment mock module.
 
 from __future__ import annotations
 
-PERSONA_MAP = {
-    "Managed Care": [
-        "VP Member Engagement",
-        "Director Medicaid Operations",
-        "Chief Digital Officer",
-        "Director Member Services",
-    ],
-    "Health Plan": [
-        "VP Member Engagement",
-        "Director Medicaid Operations",
-        "Chief Digital Officer",
-        "Director Member Services",
-    ],
-    "Provider": [
-        "VP Population Health",
-        "Director Patient Engagement",
-        "Chief Digital Officer",
-    ],
-    "Healthcare Technology": [
-        "Revenue Operations Manager",
-        "VP Customer Experience",
-        "Chief Digital Officer",
-    ],
-}
+import json
+import os
 
-DEFAULT_PERSONAS = ["Revenue Operations Manager", "VP Customer Experience"]
+_CONFIG_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    "config", "persona_map.json",
+)
+
+with open(_CONFIG_PATH) as _f:
+    _persona_config = json.load(_f)
+
+PERSONA_MAP: dict = _persona_config["industry_personas"]
+DEFAULT_PERSONAS: list = _persona_config["default_personas"]
 
 APPROVED_TIERS = {"Tier 1", "Tier 2"}
 

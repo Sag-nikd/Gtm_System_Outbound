@@ -1,0 +1,45 @@
+{
+  "campaign_name": "Outbound Tier 1/2 — {industry_type}",
+  "email_angles": {
+    "VP Sales": [
+      "How {industry_type} teams are shortening sales cycles",
+      "Pipeline velocity tactics that work for {company_name}",
+      "Quick win: 3 ways to improve win rates in your segment"
+    ],
+    "Revenue Operations Manager": [
+      "RevOps alignment that drives predictable revenue",
+      "Scaling outbound pipeline without adding headcount",
+      "Improving CRM hygiene for faster sales cycles"
+    ],
+    "Chief Technology Officer": [
+      "How modern GTM stacks reduce time-to-pipeline",
+      "API-first outreach infrastructure for scaling teams",
+      "Connecting your tech stack to revenue outcomes"
+    ],
+    "VP Customer Experience": [
+      "CX-driven growth in competitive markets",
+      "Building loyalty programs that reduce churn",
+      "NPS improvement strategies for your customer base"
+    ],
+    "VP Marketing": [
+      "Demand generation that converts at the bottom of funnel",
+      "How peers are improving MQL-to-SQL conversion rates",
+      "Account-based marketing for enterprise pipeline"
+    ],
+    "Chief Executive Officer": [
+      "How leading {industry_type} companies are growing faster",
+      "GTM efficiency: doing more with your existing team",
+      "A quick look at what's working in outbound right now"
+    ]
+  },
+  "default_angles": [
+    "How leading {industry_type} companies are improving outcomes",
+    "Proven strategies for pipeline growth and retention",
+    "What the top teams in your space are doing differently"
+  ],
+  "linkedin_templates": {
+    "connection_message": "Hi {first_name}, I work with {industry_type} teams on outbound pipeline and GTM strategy. Would love to connect and share what's working.",
+    "followup_message_1": "Hi {first_name}, thanks for connecting. We help {industry_type} companies improve pipeline efficiency — happy to share a short case study if relevant.",
+    "followup_message_2": "Hi {first_name}, following up one last time — open to a 15-min call to explore if there's a fit? No pressure either way. Happy to send a resource instead."
+  }
+}
