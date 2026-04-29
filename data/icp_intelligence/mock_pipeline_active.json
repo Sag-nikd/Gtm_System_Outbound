@@ -1,0 +1,102 @@
+[
+  {
+    "company_name": "Sunshine State Health Plan",
+    "domain": "sunshinestatehealth.com",
+    "deal_stage": "proposal_sent",
+    "deal_value": 120000,
+    "days_in_stage": 8,
+    "last_activity_date": "2026-04-22",
+    "assigned_rep": "Sarah Chen",
+    "engagement_score": 82
+  },
+  {
+    "company_name": "Beacon Health Partners",
+    "domain": "beaconhealthpartners.com",
+    "deal_stage": "negotiation",
+    "deal_value": 185000,
+    "days_in_stage": 21,
+    "last_activity_date": "2026-04-18",
+    "assigned_rep": "Marcus Williams",
+    "engagement_score": 91
+  },
+  {
+    "company_name": "Prairie State Medicaid",
+    "domain": "prairiestatemedicaid.com",
+    "deal_stage": "meeting_booked",
+    "deal_value": 95000,
+    "days_in_stage": 5,
+    "last_activity_date": "2026-04-25",
+    "assigned_rep": "Sarah Chen",
+    "engagement_score": 67
+  },
+  {
+    "company_name": "Rocky Mountain Health Plan",
+    "domain": "rockymountainhealthplan.com",
+    "deal_stage": "proposal_sent",
+    "deal_value": 145000,
+    "days_in_stage": 14,
+    "last_activity_date": "2026-04-15",
+    "assigned_rep": "Jordan Lee",
+    "engagement_score": 74
+  },
+  {
+    "company_name": "Delta Community Care",
+    "domain": "deltacommunitycare.com",
+    "deal_stage": "meeting_booked",
+    "deal_value": 80000,
+    "days_in_stage": 3,
+    "last_activity_date": "2026-04-27",
+    "assigned_rep": "Marcus Williams",
+    "engagement_score": 58
+  },
+  {
+    "company_name": "Cornerstone Health Alliance",
+    "domain": "cornerstonehealthalliance.com",
+    "deal_stage": "negotiation",
+    "deal_value": 220000,
+    "days_in_stage": 30,
+    "last_activity_date": "2026-04-10",
+    "assigned_rep": "Jordan Lee",
+    "engagement_score": 88
+  },
+  {
+    "company_name": "Gateway Managed Care",
+    "domain": "gatewaymanagedcare.com",
+    "deal_stage": "contacted",
+    "deal_value": null,
+    "days_in_stage": 12,
+    "last_activity_date": "2026-04-17",
+    "assigned_rep": "Sarah Chen",
+    "engagement_score": 42
+  },
+  {
+    "company_name": "Metro Health Network",
+    "domain": "metrohealthnetwork.com",
+    "deal_stage": "proposal_sent",
+    "deal_value": 100000,
+    "days_in_stage": 19,
+    "last_activity_date": "2026-04-09",
+    "assigned_rep": "Marcus Williams",
+    "engagement_score": 71
+  },
+  {
+    "company_name": "Cascade Care Partners",
+    "domain": "cascadecarepartners.com",
+    "deal_stage": "meeting_booked",
+    "deal_value": 65000,
+    "days_in_stage": 7,
+    "last_activity_date": "2026-04-23",
+    "assigned_rep": "Jordan Lee",
+    "engagement_score": 63
+  },
+  {
+    "company_name": "New England Health Collective",
+    "domain": "nehealthcollective.com",
+    "deal_stage": "negotiation",
+    "deal_value": 160000,
+    "days_in_stage": 25,
+    "last_activity_date": "2026-04-12",
+    "assigned_rep": "Sarah Chen",
+    "engagement_score": 85
+  }
+]
