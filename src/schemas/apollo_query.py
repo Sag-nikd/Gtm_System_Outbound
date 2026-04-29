@@ -17,4 +17,4 @@ class ApolloQueryConfig(BaseModel):
         import os
         os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
         with open(output_path, "w", encoding="utf-8") as f:
-            json.dump(self.dict(), f, indent=2)
+            json.dump(self.model_dump(), f, indent=2)
