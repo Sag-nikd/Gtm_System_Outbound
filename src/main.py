@@ -301,7 +301,7 @@ def _config_hash() -> str:
     try:
         with open(path, "rb") as f:
             return hashlib.md5(f.read()).hexdigest()
-    except Exception:
+    except OSError:
         return ""
 
 
@@ -385,7 +385,32 @@ def main() -> None:
     stages.append(_stage_entry("campaign_monitoring", 0, "completed"))
 
     _write_manifest(run_id, started_at, stages)
+
+    if settings.STORAGE_ENABLED:
+        _persist_to_storage(run_id, started_at, stages, enriched, validated)
+
     log.info("Pipeline complete — 11 checkpoint CSVs written to %s", settings.OUTPUT_DIR)
+
+
+def _persist_to_storage(
+    run_id: str, started_at: str, stages: list,
+    enriched: List[dict], validated: List[dict],
+) -> None:
+    from src.storage.sqlite_backend import SQLiteBackend
+    try:
+        db = SQLiteBackend(settings.STORAGE_DB_PATH)
+        db.save_pipeline_run({
+            "run_id": run_id,
+            "started_at": started_at,
+            "status": "completed",
+            "company_count": len(enriched),
+            "contact_count": len(validated),
+        })
+        db.save_companies(enriched, run_id)
+        db.save_contacts(validated, run_id)
+        log.info("Run %s persisted to SQLite at %s", run_id, settings.STORAGE_DB_PATH)
+    except Exception as exc:  # storage failure must not abort the pipeline
+        log.warning("Storage persistence failed: %s", exc)
 
 
 def _write_manifest(run_id: str, started_at: str, stages: list) -> None:

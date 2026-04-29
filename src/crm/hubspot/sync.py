@@ -97,7 +97,7 @@ class HubSpotSyncClient:
         if not resp.ok:
             try:
                 log.debug("HubSpot error: %s", resp.json())
-            except Exception:
+            except (ValueError, KeyError):
                 pass
         resp.raise_for_status()
         return resp.json()
@@ -126,7 +126,7 @@ class HubSpotSyncClient:
             resp = self._post("/crm/v3/objects/companies/search", payload)
             results = resp.get("results", [])
             return results[0]["id"] if results else None
-        except Exception:
+        except (requests.HTTPError, requests.RequestException, KeyError):
             return None
 
     def find_contact_by_email(self, email: str) -> Optional[str]:
@@ -140,7 +140,7 @@ class HubSpotSyncClient:
             resp = self._post("/crm/v3/objects/contacts/search", payload)
             results = resp.get("results", [])
             return results[0]["id"] if results else None
-        except Exception:
+        except (requests.HTTPError, requests.RequestException, KeyError):
             return None
 
     # ── Create / update ───────────────────────────────────────────────────────

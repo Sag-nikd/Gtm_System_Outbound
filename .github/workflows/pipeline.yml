@@ -1,0 +1,45 @@
+name: Scheduled GTM Pipeline
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'  # Every Monday at 08:00 UTC
+  workflow_dispatch:
+    inputs:
+      mock_mode:
+        description: 'Run in mock mode (true/false)'
+        required: false
+        default: 'true'
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run GTM pipeline
+        env:
+          MOCK_MODE: ${{ github.event.inputs.mock_mode || 'true' }}
+          APOLLO_API_KEY: ${{ secrets.APOLLO_API_KEY }}
+          CLAY_API_KEY: ${{ secrets.CLAY_API_KEY }}
+          HUBSPOT_PRIVATE_APP_TOKEN: ${{ secrets.HUBSPOT_PRIVATE_APP_TOKEN }}
+          ZEROBOUNCE_API_KEY: ${{ secrets.ZEROBOUNCE_API_KEY }}
+          NEVERBOUNCE_API_KEY: ${{ secrets.NEVERBOUNCE_API_KEY }}
+          VALIDITY_API_KEY: ${{ secrets.VALIDITY_API_KEY }}
+        run: python src/main.py
+
+      - name: Upload pipeline outputs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pipeline-outputs-${{ github.run_id }}
+          path: outputs/
+          retention-days: 30

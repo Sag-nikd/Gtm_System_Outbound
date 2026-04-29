@@ -44,6 +44,15 @@ class Settings:
 
         self.LOG_FORMAT: str = os.getenv("LOG_FORMAT", "text")
 
+        # Storage
+        self.STORAGE_ENABLED: bool = (
+            os.getenv("STORAGE_ENABLED", "false").lower() == "true"
+        )
+        self.STORAGE_DB_PATH: str = os.getenv(
+            "STORAGE_DB_PATH",
+            os.path.join(self.BASE_DIR, "outputs", "gtm_pipeline.db"),
+        )
+
         # ICP Intelligence (Stage 0) settings
         self.ICP_INTELLIGENCE_ENABLED: bool = (
             os.getenv("ICP_INTELLIGENCE_ENABLED", "false").lower() == "true"

@@ -26,7 +26,7 @@ def _extract_domain(website: str) -> str:
     try:
         parsed = urlparse(website if website.startswith("http") else f"https://{website}")
         return parsed.netloc.replace("www.", "").strip()
-    except Exception:
+    except (ValueError, AttributeError):
         return website.strip()
 
 
