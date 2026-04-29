@@ -1,6 +1,6 @@
 [
   {
-    "campaign_name": "HealConnect Member Engagement - Tier 1",
+    "campaign_name": "Outbound Tier 1 — B2B Technology",
     "emails_sent": 320,
     "open_rate": 0.42,
     "reply_rate": 0.06,
@@ -12,7 +12,7 @@
     "domain_health_score": 88
   },
   {
-    "campaign_name": "HealConnect Member Engagement - Tier 2",
+    "campaign_name": "Outbound Tier 2 — E-commerce",
     "emails_sent": 210,
     "open_rate": 0.34,
     "reply_rate": 0.03,
@@ -24,7 +24,7 @@
     "domain_health_score": 81
   },
   {
-    "campaign_name": "Medicaid Operations Outreach - Wave 1",
+    "campaign_name": "RevOps Outreach — Marketplace Wave 1",
     "emails_sent": 180,
     "open_rate": 0.27,
     "reply_rate": 0.015,
@@ -36,7 +36,7 @@
     "domain_health_score": 62
   },
   {
-    "campaign_name": "Digital Health Platform - CDO Sequence",
+    "campaign_name": "VP Sales Sequence — Financial Services",
     "emails_sent": 95,
     "open_rate": 0.38,
     "reply_rate": 0.04,
@@ -48,7 +48,7 @@
     "domain_health_score": 92
   },
   {
-    "campaign_name": "Zero-Send Campaign - Warmup Test",
+    "campaign_name": "Zero-Send Campaign — Warmup Test",
     "emails_sent": 0,
     "open_rate": 0.0,
     "reply_rate": 0.0,
@@ -60,7 +60,7 @@
     "domain_health_score": 75
   },
   {
-    "campaign_name": "All-Zero Metrics - Edge Case Campaign",
+    "campaign_name": "All-Zero Metrics — Edge Case Campaign",
     "emails_sent": 0,
     "open_rate": 0.0,
     "reply_rate": 0.0,
@@ -72,7 +72,7 @@
     "domain_health_score": 0
   },
   {
-    "campaign_name": "Provider Outreach Wave 2 - Domain Recovery",
+    "campaign_name": "Domain Recovery — Logistics Wave 2",
     "emails_sent": 145,
     "open_rate": 0.18,
     "reply_rate": 0.01,

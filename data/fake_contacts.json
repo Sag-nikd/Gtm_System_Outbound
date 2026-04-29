@@ -2,92 +2,92 @@
   {
     "contact_id": "K001",
     "company_id": "C001",
-    "first_name": "Angela",
-    "last_name": "Morrison",
-    "title": "VP Member Engagement",
-    "email": "angela.morrison@centenehealthpartners.com",
-    "linkedin_url": "https://linkedin.com/in/angela-morrison-c001",
-    "persona_type": "VP Member Engagement"
+    "first_name": "Alice",
+    "last_name": "Chen",
+    "title": "VP Sales",
+    "email": "alice.chen@nexgenb2b.com",
+    "linkedin_url": "https://linkedin.com/in/alice-chen-c001",
+    "persona_type": "VP Sales"
   },
   {
     "contact_id": "K002",
     "company_id": "C001",
     "first_name": "Derek",
     "last_name": "Okafor",
-    "title": "Director Medicaid Operations",
-    "email": "derek.okafor@centenehealthpartners.com",
+    "title": "Revenue Operations Manager",
+    "email": "derek.okafor@nexgenb2b.com",
     "linkedin_url": "https://linkedin.com/in/derek-okafor-c001",
-    "persona_type": "Director Medicaid Operations"
+    "persona_type": "Revenue Operations Manager"
   },
   {
     "contact_id": "K003",
     "company_id": "C001",
     "first_name": "Sandra",
     "last_name": "Chu",
-    "title": "Chief Digital Officer",
-    "email": "sandra.chu@centenehealthpartners.com",
+    "title": "Chief Technology Officer",
+    "email": "sandra.chu@nexgenb2b.com",
     "linkedin_url": "https://linkedin.com/in/sandra-chu-c001",
-    "persona_type": "Chief Digital Officer"
+    "persona_type": "Chief Technology Officer"
   },
   {
     "contact_id": "K004",
     "company_id": "C002",
     "first_name": "Marcus",
     "last_name": "Reid",
-    "title": "VP Member Engagement",
-    "email": "marcus.reid@bluepathhealth.com",
+    "title": "VP Marketing",
+    "email": "marcus.reid@shopstreamcommerce.com",
     "linkedin_url": "https://linkedin.com/in/marcus-reid-c002",
-    "persona_type": "VP Member Engagement"
+    "persona_type": "VP Marketing"
   },
   {
     "contact_id": "K005",
     "company_id": "C002",
     "first_name": "Priya",
     "last_name": "Nair",
-    "title": "Director Member Services",
-    "email": "priya.nair@bluepathhealth.com",
+    "title": "Revenue Operations Manager",
+    "email": "priya.nair@shopstreamcommerce.com",
     "linkedin_url": "https://linkedin.com/in/priya-nair-c002",
-    "persona_type": "Director Member Services"
+    "persona_type": "Revenue Operations Manager"
   },
   {
     "contact_id": "K006",
     "company_id": "C003",
     "first_name": "James",
     "last_name": "Whitfield",
-    "title": "VP Member Engagement",
-    "email": "james.whitfield@meridiancaresolutions.com",
+    "title": "VP Sales",
+    "email": "james.whitfield@tradebridgemarketplace.com",
     "linkedin_url": "https://linkedin.com/in/james-whitfield-c003",
-    "persona_type": "VP Member Engagement"
+    "persona_type": "VP Sales"
   },
   {
     "contact_id": "K007",
     "company_id": "C003",
     "first_name": "Linda",
     "last_name": "Park",
-    "title": "Director Medicaid Operations",
-    "email": "linda.park@meridiancaresolutions.com",
+    "title": "Revenue Operations Manager",
+    "email": "linda.park@tradebridgemarketplace.com",
     "linkedin_url": "https://linkedin.com/in/linda-park-c003",
-    "persona_type": "Director Medicaid Operations"
+    "persona_type": "Revenue Operations Manager"
   },
   {
     "contact_id": "K008",
     "company_id": "C004",
     "first_name": "Carlos",
     "last_name": "Rivera",
-    "title": "Chief Digital Officer",
-    "email": "carlos.rivera@elevancecommunity.com",
+    "title": "Chief Executive Officer",
+    "email": "carlos.rivera@apexfinancialgroup.com",
     "linkedin_url": "https://linkedin.com/in/carlos-rivera-c004",
-    "persona_type": "Chief Digital Officer"
+    "persona_type": "Chief Executive Officer"
   },
   {
     "contact_id": "K009",
     "company_id": "C004",
     "first_name": "invalid_user",
     "last_name": "Test",
-    "title": "Director Member Services",
-    "email": "invalid.email@elevancecommunity.com",
+    "title": "VP Sales",
+    "email": "invalid.email@apexfinancialgroup.com",
     "linkedin_url": "https://linkedin.com/in/invalid-test-c004",
-    "persona_type": "Director Member Services"
+    "persona_type": "VP Sales"
   },
   {
     "contact_id": "K010",
@@ -95,7 +95,7 @@
     "first_name": "Rachel",
     "last_name": "Stone",
     "title": "Revenue Operations Manager",
-    "email": "rachel.stone@novacaredh.com",
+    "email": "rachel.stone@fleetroutelogistics.com",
     "linkedin_url": "https://linkedin.com/in/rachel-stone-c005",
     "persona_type": "Revenue Operations Manager"
   },
@@ -104,70 +104,70 @@
     "company_id": "C005",
     "first_name": "Tom",
     "last_name": "risky_account",
-    "title": "VP Customer Experience",
-    "email": "tom.risky@novacaredh.com",
+    "title": "VP Operations",
+    "email": "tom.risky@fleetroutelogistics.com",
     "linkedin_url": "https://linkedin.com/in/tom-risky-c005",
-    "persona_type": "VP Customer Experience"
+    "persona_type": "VP Operations"
   },
   {
     "contact_id": "K012",
     "company_id": "C006",
     "first_name": "Natalie",
     "last_name": "Brooks",
-    "title": "VP Population Health",
-    "email": "natalie.brooks@riversideregional.org",
+    "title": "VP Marketing",
+    "email": "natalie.brooks@brightmartretail.com",
     "linkedin_url": "https://linkedin.com/in/natalie-brooks-c006",
-    "persona_type": "VP Population Health"
+    "persona_type": "VP Marketing"
   },
   {
     "contact_id": "K013",
     "company_id": "C009",
     "first_name": "Gregory",
     "last_name": "Osei",
-    "title": "VP Member Engagement",
-    "email": "gregory.osei@alliantmanagedcare.com",
+    "title": "VP Sales",
+    "email": "gregory.osei@connectxmarketplace.com",
     "linkedin_url": "https://linkedin.com/in/gregory-osei-c009",
-    "persona_type": "VP Member Engagement"
+    "persona_type": "VP Sales"
   },
   {
     "contact_id": "K014",
     "company_id": "C015",
     "first_name": "Patricia",
     "last_name": "Holloway",
-    "title": "Director Medicaid Operations",
-    "email": "patricia.holloway@highmarkblueshieldhealth.com",
+    "title": "VP Sales",
+    "email": "patricia.holloway@vantagecloudplatform.com",
     "linkedin_url": "https://linkedin.com/in/patricia-holloway-c015",
-    "persona_type": "Director Medicaid Operations"
+    "persona_type": "VP Sales"
   },
   {
     "contact_id": "K015",
     "company_id": "C012",
     "first_name": "Vincent",
     "last_name": "Tran",
-    "title": "Chief Digital Officer",
-    "email": "vincent.tran@innovexconnectedhealth.com",
+    "title": "Chief Technology Officer",
+    "email": "vincent.tran@urbanstyleretail.com",
     "linkedin_url": "https://linkedin.com/in/vincent-tran-c012",
-    "persona_type": "Chief Digital Officer"
+    "persona_type": "Chief Technology Officer"
   },
   {
     "contact_id": "K016",
     "company_id": "C001",
     "first_name": "EmptyEmail",
     "last_name": "EdgeCase",
-    "title": "Director Member Services",
+    "title": "Revenue Operations Manager",
     "email": "",
     "linkedin_url": "https://linkedin.com/in/emptyemail-edge-c001",
-    "persona_type": "Director Member Services"
+    "persona_type": "Revenue Operations Manager"
   },
   {
     "contact_id": "K017",
     "company_id": "C002",
     "first_name": "DuplicateEmail",
     "last_name": "EdgeCase",
-    "title": "VP Member Engagement",
-    "email": "angela.morrison@centenehealthpartners.com",
+    "title": "VP Sales",
+    "email": "alice.chen@nexgenb2b.com",
     "linkedin_url": "https://linkedin.com/in/duplicate-edge-c002",
-    "persona_type": "VP Member Engagement"
+    "persona_type": "VP Sales"
   },
   {
     "contact_id": "K018",
@@ -175,7 +175,7 @@
     "first_name": "Xavier",
     "last_name": "Nguyen",
     "title": "Chief Revenue Officer",
-    "email": "xavier.nguyen@meridiancaresolutions.com",
+    "email": "xavier.nguyen@tradebridgemarketplace.com",
     "linkedin_url": "https://linkedin.com/in/xavier-nguyen-c003",
     "persona_type": "Chief Revenue Officer"
   },
@@ -184,19 +184,39 @@
     "company_id": "C004",
     "first_name": "Sofía",
     "last_name": "García-Martínez",
-    "title": "VP Member Engagement",
-    "email": "sofia.garcia@elevancecommunity.com",
+    "title": "VP Customer Experience",
+    "email": "sofia.garcia@apexfinancialgroup.com",
     "linkedin_url": "https://linkedin.com/in/sofia-garcia-c004",
-    "persona_type": "VP Member Engagement"
+    "persona_type": "VP Customer Experience"
   },
   {
     "contact_id": "K020",
     "company_id": "C999",
     "first_name": "Orphan",
     "last_name": "Contact",
-    "title": "Director Member Services",
+    "title": "Revenue Operations Manager",
     "email": "orphan.contact@unknowncompany.com",
     "linkedin_url": "https://linkedin.com/in/orphan-contact",
-    "persona_type": "Director Member Services"
+    "persona_type": "Revenue Operations Manager"
+  },
+  {
+    "contact_id": "K021",
+    "company_id": "C006",
+    "first_name": "Amy",
+    "last_name": "Tanaka",
+    "title": "VP Customer Experience",
+    "email": "amy.tanaka@brightmartretail.com",
+    "linkedin_url": "https://linkedin.com/in/amy-tanaka-c006",
+    "persona_type": "VP Customer Experience"
+  },
+  {
+    "contact_id": "K022",
+    "company_id": "C011",
+    "first_name": "Brian",
+    "last_name": "Walsh",
+    "title": "Revenue Operations Manager",
+    "email": "brian.walsh@bayshorepnwlogistics.com",
+    "linkedin_url": "https://linkedin.com/in/brian-walsh-c011",
+    "persona_type": "Revenue Operations Manager"
   }
 ]
