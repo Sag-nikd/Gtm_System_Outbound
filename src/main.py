@@ -45,23 +45,38 @@ def _save(df: pd.DataFrame, filename: str) -> str:
 
 
 def _get_clients() -> Tuple:
-    if settings.MOCK_MODE:
-        return (
-            ApolloMockClient(),
-            ClayMockClient(),
-            HubSpotMockClient(),
-            ZeroBounceMockClient(),
-            NeverBounceMockClient(),
-            ValidityMockClient(),
-        )
-    return (
-        ApolloAPIClient(settings.APOLLO_API_KEY),
-        ClayAPIClient(settings.CLAY_API_KEY),
-        HubSpotAPIClient(settings.HUBSPOT_PRIVATE_APP_TOKEN),
-        ZeroBounceAPIClient(settings.ZEROBOUNCE_API_KEY),
-        NeverBounceAPIClient(settings.NEVERBOUNCE_API_KEY),
-        ValidityAPIClient(settings.VALIDITY_API_KEY),
+    """Select mock or live client per integration based on per-integration MODE env vars."""
+    apollo = (
+        ApolloMockClient()
+        if settings.APOLLO_MODE == "mock"
+        else ApolloAPIClient(settings.APOLLO_API_KEY)
     )
+    clay = (
+        ClayMockClient()
+        if settings.CLAY_MODE == "mock"
+        else ClayAPIClient(settings.CLAY_API_KEY)
+    )
+    hubspot = (
+        HubSpotMockClient()
+        if settings.HUBSPOT_MODE == "mock"
+        else HubSpotAPIClient(settings.HUBSPOT_PRIVATE_APP_TOKEN)
+    )
+    zerobounce = (
+        ZeroBounceMockClient()
+        if settings.ZEROBOUNCE_MODE == "mock"
+        else ZeroBounceAPIClient(settings.ZEROBOUNCE_API_KEY)
+    )
+    neverbounce = (
+        NeverBounceMockClient()
+        if settings.NEVERBOUNCE_MODE == "mock"
+        else NeverBounceAPIClient(settings.NEVERBOUNCE_API_KEY)
+    )
+    validity = (
+        ValidityMockClient()
+        if settings.VALIDITY_MODE == "mock"
+        else ValidityAPIClient(settings.VALIDITY_API_KEY)
+    )
+    return apollo, clay, hubspot, zerobounce, neverbounce, validity
 
 
 # ── Pipeline stages ───────────────────────────────────────────────────────────

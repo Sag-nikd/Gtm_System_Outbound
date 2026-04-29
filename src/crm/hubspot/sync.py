@@ -179,6 +179,147 @@ class HubSpotSyncClient:
             f"/crm/v3/objects/contacts/{contact_id}/associations/companies/{company_id}/contact_to_company"
         )
 
+    # ── Batch operations (Story 2.4) ──────────────────────────────────────────
+
+    _BATCH_SIZE = 100
+
+    def _batch_post(self, object_type: str, action: str, inputs: list) -> list:
+        """POST to batch create or update endpoint, returning all result records."""
+        results = []
+        for i in range(0, len(inputs), self._BATCH_SIZE):
+            chunk = inputs[i: i + self._BATCH_SIZE]
+            data = self._post(f"/crm/v3/objects/{object_type}/batch/{action}", {"inputs": chunk})
+            results.extend(data.get("results", []))
+        return results
+
+    def _search_by_values(self, object_type: str, prop: str, values: list) -> dict:
+        """Return {value: hubspot_id} for matching records."""
+        if not values:
+            return {}
+        payload = {
+            "filterGroups": [
+                {"filters": [{"propertyName": prop, "operator": "IN", "values": values}]}
+            ],
+            "properties": [prop],
+            "limit": len(values),
+        }
+        try:
+            resp = self._post(f"/crm/v3/objects/{object_type}/search", payload)
+            return {
+                r["properties"].get(prop, ""): r["id"]
+                for r in resp.get("results", [])
+                if r["properties"].get(prop)
+            }
+        except Exception as exc:
+            log.warning("HubSpot batch search failed: %s", exc)
+            return {}
+
+    def batch_upsert_companies(self, companies: list) -> dict:
+        """
+        Batch upsert companies (max 100 per API call).
+        Returns {gtm_company_id: hubspot_id}.
+        """
+        domains = [build_company_properties(co).get("domain", "") for co in companies]
+        existing = self._search_by_values("companies", "domain", [d for d in domains if d])
+
+        to_create, to_update = [], []
+        company_meta = []  # track which gtm company_id maps to which batch slot
+
+        for co in companies:
+            props = build_company_properties(co)
+            domain = props.get("domain", "")
+            hs_id = existing.get(domain)
+            if hs_id:
+                to_update.append({"id": hs_id, "properties": props})
+                company_meta.append(("update", co["company_id"], hs_id))
+            else:
+                to_create.append({"properties": props})
+                company_meta.append(("create", co["company_id"], None))
+
+        if to_update:
+            self._batch_post("companies", "update", to_update)
+
+        created_ids: list = []
+        if to_create:
+            created = self._batch_post("companies", "create", to_create)
+            created_ids = [r["id"] for r in created]
+
+        id_map: dict = {}
+        create_cursor = 0
+        for action, cid, hs_id in company_meta:
+            if action == "update":
+                id_map[cid] = hs_id
+            else:
+                if create_cursor < len(created_ids):
+                    id_map[cid] = created_ids[create_cursor]
+                create_cursor += 1
+
+        log.info(
+            "HubSpot batch: %d companies created, %d updated",
+            len(to_create), len(to_update),
+        )
+        return id_map
+
+    def batch_upsert_contacts(
+        self, contacts: list, company_id_map: dict
+    ) -> tuple:
+        """
+        Batch upsert contacts (max 100 per API call).
+        Returns (created_count, updated_count, associated_count).
+        """
+        emails = [build_contact_properties(ct).get("email", "") for ct in contacts]
+        existing = self._search_by_values("contacts", "email", [e for e in emails if e])
+
+        to_create, to_update = [], []
+        contact_meta = []  # (action, contact, hs_id_or_None)
+
+        for ct in contacts:
+            props = build_contact_properties(ct)
+            email = props.get("email", "")
+            hs_id = existing.get(email)
+            if hs_id:
+                to_update.append({"id": hs_id, "properties": props})
+                contact_meta.append(("update", ct, hs_id))
+            else:
+                to_create.append({"properties": props})
+                contact_meta.append(("create", ct, None))
+
+        if to_update:
+            self._batch_post("contacts", "update", to_update)
+
+        created_ids: list = []
+        if to_create:
+            created = self._batch_post("contacts", "create", to_create)
+            created_ids = [r["id"] for r in created]
+
+        # Build full contact→hubspot_id map and associate
+        created_count = updated_count = associated = 0
+        create_cursor = 0
+        for action, ct, hs_id in contact_meta:
+            if action == "update":
+                hs_contact_id = hs_id
+                updated_count += 1
+            else:
+                hs_contact_id = created_ids[create_cursor] if create_cursor < len(created_ids) else None
+                create_cursor += 1
+                created_count += 1
+
+            if hs_contact_id:
+                hs_co_id = company_id_map.get(ct.get("company_id", ""))
+                if hs_co_id:
+                    try:
+                        self.associate_contact_to_company(hs_contact_id, hs_co_id)
+                        associated += 1
+                    except Exception as exc:
+                        name = f"{ct.get('first_name', '')} {ct.get('last_name', '')}".strip()
+                        log.warning("Association failed for %s: %s", name, exc)
+
+        log.info(
+            "HubSpot batch: %d contacts created, %d updated, %d associations",
+            created_count, updated_count, associated,
+        )
+        return created_count, updated_count, associated
+
 
 # ── Property builders ─────────────────────────────────────────────────────────
 

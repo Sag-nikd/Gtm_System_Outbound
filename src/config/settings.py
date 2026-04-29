@@ -10,6 +10,16 @@ class Settings:
     def __init__(self) -> None:
         self.MOCK_MODE: bool = os.getenv("MOCK_MODE", "true").lower() == "true"
 
+        # Per-integration mode overrides: "mock" or "live".
+        # Defaults to the global MOCK_MODE setting when not explicitly set.
+        _default_mode = "mock" if self.MOCK_MODE else "live"
+        self.APOLLO_MODE: str = os.getenv("APOLLO_MODE", _default_mode)
+        self.CLAY_MODE: str = os.getenv("CLAY_MODE", _default_mode)
+        self.HUBSPOT_MODE: str = os.getenv("HUBSPOT_MODE", _default_mode)
+        self.ZEROBOUNCE_MODE: str = os.getenv("ZEROBOUNCE_MODE", _default_mode)
+        self.NEVERBOUNCE_MODE: str = os.getenv("NEVERBOUNCE_MODE", _default_mode)
+        self.VALIDITY_MODE: str = os.getenv("VALIDITY_MODE", _default_mode)
+
         self.APOLLO_API_KEY: str = os.getenv("APOLLO_API_KEY", "")
         self.CLAY_API_KEY: str = os.getenv("CLAY_API_KEY", "")
         self.HUBSPOT_PRIVATE_APP_TOKEN: str = os.getenv("HUBSPOT_PRIVATE_APP_TOKEN", "")
@@ -51,19 +61,25 @@ class Settings:
 
         self._validate()
 
-    _REQUIRED_LIVE_KEYS = [
-        "APOLLO_API_KEY",
-        "CLAY_API_KEY",
-        "HUBSPOT_PRIVATE_APP_TOKEN",
-        "ZEROBOUNCE_API_KEY",
-        "NEVERBOUNCE_API_KEY",
-        "VALIDITY_API_KEY",
+    # Map per-integration MODE attr → required API key attr
+    _MODE_KEY_MAP = [
+        ("APOLLO_MODE", "APOLLO_API_KEY"),
+        ("CLAY_MODE", "CLAY_API_KEY"),
+        ("HUBSPOT_MODE", "HUBSPOT_PRIVATE_APP_TOKEN"),
+        ("ZEROBOUNCE_MODE", "ZEROBOUNCE_API_KEY"),
+        ("NEVERBOUNCE_MODE", "NEVERBOUNCE_API_KEY"),
+        ("VALIDITY_MODE", "VALIDITY_API_KEY"),
     ]
 
+    # Kept for backwards-compat with existing settings tests
+    _REQUIRED_LIVE_KEYS = [key for _, key in _MODE_KEY_MAP]
+
     def _validate(self) -> None:
-        if self.MOCK_MODE:
-            return
-        missing = [k for k in self._REQUIRED_LIVE_KEYS if not getattr(self, k)]
+        missing = [
+            key
+            for mode_attr, key in self._MODE_KEY_MAP
+            if getattr(self, mode_attr, "live") == "live" and not getattr(self, key, "")
+        ]
         if missing:
             raise EnvironmentError(
                 f"Missing required keys for live mode: {', '.join(missing)}"

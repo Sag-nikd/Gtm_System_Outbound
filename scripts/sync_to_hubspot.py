@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Run the GTM simulation pipeline and push all records to HubSpot.
+Run the GTM simulation pipeline and push all records to HubSpot via batch API.
 
 Usage:
     python scripts/sync_to_hubspot.py
@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import os
 import sys
-import time
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -21,11 +20,7 @@ from src.integrations.apollo import ApolloMockClient
 from src.integrations.clay import ClayMockClient
 from src.integrations.zerobounce import ZeroBounceMockClient
 from src.integrations.neverbounce import NeverBounceMockClient
-from src.crm.hubspot.sync import (
-    HubSpotSyncClient,
-    build_company_properties,
-    build_contact_properties,
-)
+from src.crm.hubspot.sync import HubSpotSyncClient
 from src.utils.logger import get_logger
 
 log = get_logger("sync_to_hubspot")
@@ -55,76 +50,38 @@ def main() -> None:
     client = HubSpotSyncClient(_TOKEN)
     log.info("Connected to HubSpot")
 
-    # ── Step 3: Push companies ────────────────────────────────────────────────
+    # ── Step 3: Batch push companies ──────────────────────────────────────────
     print("\n" + "=" * 60)
-    print("  Pushing Companies to HubSpot")
+    print("  Pushing Companies to HubSpot (batch)")
     print("=" * 60)
 
-    company_id_map: dict = {}  # gtm company_id -> hubspot_id
-    created_cos = updated_cos = failed_cos = 0
+    try:
+        company_id_map = client.batch_upsert_companies(enriched)
+        print(f"  Companies pushed: {len(company_id_map)} / {len(enriched)}")
+    except Exception as exc:
+        log.error("Batch company push failed: %s", exc)
+        company_id_map = {}
 
-    for co in enriched:
-        name = co.get("company_name", "")
-        props = build_company_properties(co)
-        try:
-            hs_id, action = client.upsert_company(props)
-            company_id_map[co["company_id"]] = hs_id
-            if action == "created":
-                created_cos += 1
-                print(f"  [CREATED] {name} (tier={co.get('icp_tier')} score={co.get('icp_score')}) -> id={hs_id}")
-            else:
-                updated_cos += 1
-                print(f"  [UPDATED] {name} -> id={hs_id}")
-            time.sleep(0.15)  # stay within HubSpot rate limits
-        except Exception as exc:
-            failed_cos += 1
-            log.error("Failed to push company '%s': %s", name, exc)
-
-    print(f"\n  Companies: {created_cos} created, {updated_cos} updated, {failed_cos} failed")
-
-    # ── Step 4: Push contacts ─────────────────────────────────────────────────
+    # ── Step 4: Batch push contacts ───────────────────────────────────────────
     print("\n" + "=" * 60)
-    print("  Pushing Contacts to HubSpot")
+    print("  Pushing Contacts to HubSpot (batch)")
     print("=" * 60)
 
-    created_cts = updated_cts = failed_cts = associated = 0
-
-    for ct in validated:
-        email = ct.get("email", "")
-        name = f"{ct.get('first_name','')} {ct.get('last_name','')}".strip()
-        props = build_contact_properties(ct)
-        try:
-            hs_contact_id, action = client.upsert_contact(props)
-            if action == "created":
-                created_cts += 1
-                print(f"  [CREATED] {name} <{email}> ({ct.get('final_validation_status')}) -> id={hs_contact_id}")
-            else:
-                updated_cts += 1
-                print(f"  [UPDATED] {name} <{email}> -> id={hs_contact_id}")
-
-            # Associate contact to its company
-            co_id = ct.get("company_id", "")
-            hs_co_id = company_id_map.get(co_id)
-            if hs_co_id:
-                try:
-                    client.associate_contact_to_company(hs_contact_id, hs_co_id)
-                    associated += 1
-                except Exception as assoc_exc:
-                    log.warning("Could not associate %s to company: %s", name, assoc_exc)
-
-            time.sleep(0.15)
-        except Exception as exc:
-            failed_cts += 1
-            log.error("Failed to push contact '%s': %s", name, exc)
-
-    print(f"\n  Contacts: {created_cts} created, {updated_cts} updated, {failed_cts} failed")
-    print(f"  Associations: {associated} contact-company links created")
+    try:
+        created_cts, updated_cts, associated = client.batch_upsert_contacts(
+            validated, company_id_map
+        )
+        print(f"  Contacts: {created_cts} created, {updated_cts} updated")
+        print(f"  Associations: {associated} contact-company links created")
+    except Exception as exc:
+        log.error("Batch contact push failed: %s", exc)
+        created_cts = updated_cts = associated = 0
 
     # ── Summary ───────────────────────────────────────────────────────────────
     print("\n" + "=" * 60)
     print("  Sync Complete")
     print("=" * 60)
-    print(f"  Companies pushed: {created_cos + updated_cos} / {len(enriched)}")
+    print(f"  Companies pushed: {len(company_id_map)} / {len(enriched)}")
     print(f"  Contacts pushed:  {created_cts + updated_cts} / {len(validated)}")
     print(f"  Associations:     {associated}")
     if _PORTAL_ID:
