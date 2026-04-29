@@ -1,0 +1,109 @@
+version: '3.9'
+
+# Scheduled pipeline deployment.
+# Two modes:
+#   Daemon mode (recommended):  docker compose -f docker-compose.scheduled.yml up -d
+#   Cron mode:                  docker compose -f docker-compose.scheduled.yml --profile cron-mode up -d
+
+services:
+
+  # ── Daemon mode (default) ──────────────────────────────────────────────────
+  # Single long-running service that executes all stages per config/scheduler.json
+
+  scheduler:
+    build: .
+    command: python -m src.scheduler.daemon --foreground
+    env_file:
+      - .env
+    environment:
+      - MOCK_MODE=${MOCK_MODE:-true}
+      - STORAGE_ENABLED=${STORAGE_ENABLED:-false}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      - ./outputs:/app/outputs
+      - ./config:/app/config
+    restart: unless-stopped
+    healthcheck:
+      test: >
+        sh -c "test -f /app/outputs/.scheduler_heartbeat &&
+        [ $(( $(date +%s) - $(date -r /app/outputs/.scheduler_heartbeat +%s) )) -lt 120 ]"
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      db:
+        condition: service_healthy
+        required: false
+
+  # ── Cron mode (alternative — profile: cron-mode) ──────────────────────────
+  # Individual per-stage services, each with its own crontab entry.
+
+  stage1-cron:
+    build: .
+    command: >
+      sh -c "echo '0 7 * * 1 cd /app && python -m src.runner stage1 >> /app/outputs/logs/stage1_cron.log 2>&1' | crontab - && crond -f -l 2"
+    env_file:
+      - .env
+    volumes:
+      - ./outputs:/app/outputs
+      - ./config:/app/config
+    restart: unless-stopped
+    profiles: ["cron-mode"]
+
+  stage2-cron:
+    build: .
+    command: >
+      sh -c "echo '0 8 * * 1 cd /app && python -m src.runner stage2 --auto-run-deps >> /app/outputs/logs/stage2_cron.log 2>&1' | crontab - && crond -f -l 2"
+    env_file:
+      - .env
+    volumes:
+      - ./outputs:/app/outputs
+      - ./config:/app/config
+    restart: unless-stopped
+    profiles: ["cron-mode"]
+
+  stage3-cron:
+    build: .
+    command: >
+      sh -c "echo '0 6 * * * cd /app && python -m src.runner stage3 --auto-run-deps >> /app/outputs/logs/stage3_cron.log 2>&1' | crontab - && crond -f -l 2"
+    env_file:
+      - .env
+    volumes:
+      - ./outputs:/app/outputs
+      - ./config:/app/config
+    restart: unless-stopped
+    profiles: ["cron-mode"]
+
+  stage4-cron:
+    build: .
+    command: >
+      sh -c "echo '0 */4 * * * cd /app && python -m src.runner stage4 >> /app/outputs/logs/stage4_cron.log 2>&1' | crontab - && crond -f -l 2"
+    env_file:
+      - .env
+    volumes:
+      - ./outputs:/app/outputs
+      - ./config:/app/config
+    restart: unless-stopped
+    profiles: ["cron-mode"]
+
+  # ── Optional Postgres ──────────────────────────────────────────────────────
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-gtm_pipeline}
+      POSTGRES_USER: ${POSTGRES_USER:-gtm}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gtm_dev_only}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gtm}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles: ["postgres"]
+
+volumes:
+  pgdata:

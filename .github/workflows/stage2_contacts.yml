@@ -1,0 +1,85 @@
+name: Stage 2 — Contact Validation
+
+on:
+  schedule:
+    - cron: '0 13 * * 1'   # Mondays 1pm UTC (1 hour after stage1)
+  workflow_dispatch:
+    inputs:
+      mock_mode:
+        description: 'Run in mock mode?'
+        default: 'true'
+        required: false
+      run_id:
+        description: 'Run ID from stage1 (required for resume)'
+        default: ''
+        required: false
+
+jobs:
+  stage2:
+    runs-on: ubuntu-latest
+    env:
+      MOCK_MODE: ${{ github.event.inputs.mock_mode || 'true' }}
+      APOLLO_API_KEY: ${{ secrets.APOLLO_API_KEY }}
+      ZEROBOUNCE_API_KEY: ${{ secrets.ZEROBOUNCE_API_KEY }}
+      NEVERBOUNCE_API_KEY: ${{ secrets.NEVERBOUNCE_API_KEY }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      LOG_LEVEL: INFO
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Download stage1 artifact (if triggered by stage1)
+        uses: actions/download-artifact@v4
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.run_id != ''
+        with:
+          name: stage1-enriched-${{ github.run_number }}
+          path: outputs/staging/
+        continue-on-error: true
+
+      - name: Run Stage 2 — Contact Pipeline
+        run: |
+          RUN_ID="${{ github.event.inputs.run_id }}"
+          if [ -n "$RUN_ID" ]; then
+            python -m src.runner stage2 --run-id "$RUN_ID" --force
+          else
+            python -m src.runner stage2 --auto-run-deps
+          fi
+
+      - name: Upload staging artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stage2-validated-${{ github.run_number }}
+          path: outputs/staging/
+          retention-days: 7
+
+      - name: Upload CSV outputs
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: stage2-csv-${{ github.run_number }}
+          path: |
+            outputs/05_discovered_contacts.csv
+            outputs/06_email_validation_results.csv
+          retention-days: 7
+
+      - name: Trigger Stage 3
+        if: success() && github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'stage3_activation.yml',
+              ref: 'master',
+              inputs: { mock_mode: process.env.MOCK_MODE }
+            })

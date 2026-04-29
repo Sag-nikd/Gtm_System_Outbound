@@ -1,0 +1,78 @@
+name: Stage 1 — Company Prospecting
+
+on:
+  schedule:
+    - cron: '0 12 * * 1'   # Mondays noon UTC (7am ET)
+  workflow_dispatch:
+    inputs:
+      mock_mode:
+        description: 'Run in mock mode?'
+        default: 'true'
+        required: false
+      run_id:
+        description: 'Run ID (leave blank for new)'
+        default: ''
+        required: false
+
+jobs:
+  stage1:
+    runs-on: ubuntu-latest
+    env:
+      MOCK_MODE: ${{ github.event.inputs.mock_mode || 'true' }}
+      APOLLO_API_KEY: ${{ secrets.APOLLO_API_KEY }}
+      CLAY_API_KEY: ${{ secrets.CLAY_API_KEY }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      LOG_LEVEL: INFO
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Stage 1 — Company Pipeline
+        run: |
+          RUN_ID="${{ github.event.inputs.run_id }}"
+          if [ -n "$RUN_ID" ]; then
+            python -m src.runner stage1 --run-id "$RUN_ID"
+          else
+            python -m src.runner stage1
+          fi
+
+      - name: Upload staging artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stage1-enriched-${{ github.run_number }}
+          path: outputs/staging/
+          retention-days: 7
+
+      - name: Upload CSV outputs
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: stage1-csv-${{ github.run_number }}
+          path: |
+            outputs/01_company_ingestion.csv
+            outputs/02_company_enrichment.csv
+            outputs/03_icp_scored_accounts.csv
+            outputs/04_approved_accounts.csv
+          retention-days: 7
+
+      - name: Trigger Stage 2
+        if: success() && github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'stage2_contacts.yml',
+              ref: 'master',
+              inputs: { mock_mode: process.env.MOCK_MODE }
+            })

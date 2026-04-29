@@ -1,0 +1,42 @@
+name: Stage 4 — Deliverability Monitoring
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'   # Every 4 hours
+  workflow_dispatch:
+    inputs:
+      mock_mode:
+        description: 'Run in mock mode?'
+        default: 'true'
+        required: false
+
+jobs:
+  stage4:
+    runs-on: ubuntu-latest
+    env:
+      MOCK_MODE: ${{ github.event.inputs.mock_mode || 'true' }}
+      VALIDITY_API_KEY: ${{ secrets.VALIDITY_API_KEY }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      LOG_LEVEL: INFO
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Stage 4 — Campaign Monitoring
+        run: python -m src.runner stage4
+
+      - name: Upload CSV output
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stage4-monitoring-${{ github.run_number }}
+          path: outputs/11_campaign_health_report.csv
+          retention-days: 7

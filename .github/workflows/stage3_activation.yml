@@ -1,0 +1,57 @@
+name: Stage 3 — CRM Activation
+
+on:
+  schedule:
+    - cron: '0 11 * * *'   # Daily 6am ET
+  workflow_dispatch:
+    inputs:
+      mock_mode:
+        description: 'Run in mock mode?'
+        default: 'true'
+        required: false
+      run_id:
+        description: 'Run ID (leave blank for latest)'
+        default: ''
+        required: false
+
+jobs:
+  stage3:
+    runs-on: ubuntu-latest
+    env:
+      MOCK_MODE: ${{ github.event.inputs.mock_mode || 'true' }}
+      HUBSPOT_PRIVATE_APP_TOKEN: ${{ secrets.HUBSPOT_PRIVATE_APP_TOKEN }}
+      HUBSPOT_PORTAL_ID: ${{ secrets.HUBSPOT_PORTAL_ID }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      LOG_LEVEL: INFO
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Stage 3 — Activation Pipeline
+        run: |
+          RUN_ID="${{ github.event.inputs.run_id }}"
+          if [ -n "$RUN_ID" ]; then
+            python -m src.runner stage3 --run-id "$RUN_ID" --force
+          else
+            python -m src.runner stage3 --auto-run-deps
+          fi
+
+      - name: Upload CSV outputs
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: stage3-csv-${{ github.run_number }}
+          path: |
+            outputs/07_hubspot_company_export.csv
+            outputs/08_hubspot_contact_export.csv
+            outputs/09_email_sequence_export.csv
+            outputs/10_linkedin_outreach_export.csv
+          retention-days: 7

@@ -339,95 +339,18 @@ def _run_stage_zero(stages: list) -> None:
 
 
 def main() -> None:
-    log.info("GTM pipeline starting — MOCK_MODE=%s", settings.MOCK_MODE)
-    started_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    run_id = str(uuid.uuid4())
-    stages = []
-
-    _run_stage_zero(stages)
-
-    apollo, clay, hubspot, zerobounce, neverbounce, validity = _get_clients()
-
-    enriched = run_company_pipeline(apollo, clay)
-    stages.append(_stage_entry("company_pipeline", len(enriched)))
-
-    approved_companies = [c for c in enriched if c.get("contact_discovery_approved")]
-    if not approved_companies:
-        log.warning(
-            "Circuit breaker: no approved companies — skipping contact pipeline and activation"
-        )
-        run_campaign_monitoring(validity)
-        stages.append(_stage_entry("contact_pipeline", 0, "skipped"))
-        stages.append(_stage_entry("activation_pipeline", 0, "skipped"))
-        stages.append(_stage_entry("campaign_monitoring", 0, "completed"))
-        _write_manifest(run_id, started_at, stages)
-        return
-
-    validated = run_contact_pipeline(enriched, apollo, zerobounce, neverbounce)
-    stages.append(_stage_entry("contact_pipeline", len(validated)))
-
-    approved_contacts = [
-        c for c in validated if c.get("final_validation_status") == "approved"
-    ]
-    if not approved_contacts:
-        log.warning(
-            "Circuit breaker: no approved contacts — skipping activation pipeline"
-        )
-        run_campaign_monitoring(validity)
-        stages.append(_stage_entry("activation_pipeline", 0, "skipped"))
-        stages.append(_stage_entry("campaign_monitoring", 0, "completed"))
-        _write_manifest(run_id, started_at, stages)
-        return
-
-    run_activation_pipeline(validated, enriched, hubspot)
-    stages.append(_stage_entry("activation_pipeline", len(approved_contacts)))
-    run_campaign_monitoring(validity)
-    stages.append(_stage_entry("campaign_monitoring", 0, "completed"))
-
-    _write_manifest(run_id, started_at, stages)
-
-    if settings.STORAGE_ENABLED:
-        _persist_to_storage(run_id, started_at, stages, enriched, validated)
-
-    log.info("Pipeline complete — 11 checkpoint CSVs written to %s", settings.OUTPUT_DIR)
-
-
-def _persist_to_storage(
-    run_id: str, started_at: str, stages: list,
-    enriched: List[dict], validated: List[dict],
-) -> None:
-    from src.storage.sqlite_backend import SQLiteBackend
-    try:
-        db = SQLiteBackend(settings.STORAGE_DB_PATH)
-        db.save_pipeline_run({
-            "run_id": run_id,
-            "started_at": started_at,
-            "status": "completed",
-            "company_count": len(enriched),
-            "contact_count": len(validated),
-        })
-        db.save_companies(enriched, run_id)
-        db.save_contacts(validated, run_id)
-        log.info("Run %s persisted to SQLite at %s", run_id, settings.STORAGE_DB_PATH)
-    except Exception as exc:  # storage failure must not abort the pipeline
-        log.warning("Storage persistence failed: %s", exc)
-
-
-def _write_manifest(run_id: str, started_at: str, stages: list) -> None:
-    manifest = {
-        "run_id": run_id,
-        "started_at": started_at,
-        "completed_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "mock_mode": settings.MOCK_MODE,
-        "stages": stages,
-        "config_hash": _config_hash(),
-    }
-    os.makedirs(settings.OUTPUT_DIR, exist_ok=True)
-    path = os.path.join(settings.OUTPUT_DIR, "run_manifest.json")
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(manifest, f, indent=2)
-    log.info("Run manifest written: %s", path)
+    """Delegate to the runner for full backward compatibility."""
+    # Validate ICP config upfront to preserve the original ValueError semantics.
+    if settings.ICP_INTELLIGENCE_ENABLED:
+        if not settings.ICP_DEAL_DATA_PATH:
+            raise ValueError(
+                "ICP_INTELLIGENCE_ENABLED=true but ICP_DEAL_DATA_PATH is not set"
+            )
+    from src.runner import run_all
+    run_all()
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    from src.runner import run_all
+    sys.exit(run_all())

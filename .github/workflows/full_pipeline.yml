@@ -1,0 +1,46 @@
+name: Full Pipeline Run
+
+on:
+  workflow_dispatch:
+    inputs:
+      mock_mode:
+        description: 'Run in mock mode?'
+        default: 'true'
+        required: false
+
+jobs:
+  full-pipeline:
+    runs-on: ubuntu-latest
+    env:
+      MOCK_MODE: ${{ github.event.inputs.mock_mode || 'true' }}
+      APOLLO_API_KEY: ${{ secrets.APOLLO_API_KEY }}
+      CLAY_API_KEY: ${{ secrets.CLAY_API_KEY }}
+      HUBSPOT_PRIVATE_APP_TOKEN: ${{ secrets.HUBSPOT_PRIVATE_APP_TOKEN }}
+      HUBSPOT_PORTAL_ID: ${{ secrets.HUBSPOT_PORTAL_ID }}
+      ZEROBOUNCE_API_KEY: ${{ secrets.ZEROBOUNCE_API_KEY }}
+      NEVERBOUNCE_API_KEY: ${{ secrets.NEVERBOUNCE_API_KEY }}
+      VALIDITY_API_KEY: ${{ secrets.VALIDITY_API_KEY }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      LOG_LEVEL: INFO
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run full pipeline
+        run: python -m src.runner all
+
+      - name: Upload all outputs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pipeline-outputs-${{ github.run_number }}
+          path: outputs/
+          retention-days: 7

@@ -1,0 +1,69 @@
+{
+  "schedules": {
+    "stage0": {
+      "enabled": false,
+      "cron": "0 6 1 * *",
+      "description": "ICP recalibration — monthly, 1st of month at 6am",
+      "log_level": "INFO",
+      "notify_on_success": false,
+      "notify_on_failure": true,
+      "notify_channel": "#gtm-alerts"
+    },
+    "stage1": {
+      "enabled": true,
+      "cron": "0 7 * * 1",
+      "description": "Prospect sourcing — weekly, Mondays at 7am",
+      "max_retries": 2,
+      "retry_delay_seconds": 300,
+      "retry_on": ["ConnectionError", "HTTPError", "Timeout", "RequestException"],
+      "log_level": "INFO",
+      "notify_on_success": false,
+      "notify_on_failure": true,
+      "notify_channel": "#gtm-alerts"
+    },
+    "stage2": {
+      "enabled": true,
+      "cron": "0 8 * * 1",
+      "description": "Contact discovery + validation — weekly, Mondays at 8am",
+      "max_retries": 3,
+      "retry_delay_seconds": 60,
+      "retry_on": ["ConnectionError", "HTTPError", "Timeout", "RequestException"],
+      "log_level": "INFO",
+      "notify_on_success": false,
+      "notify_on_failure": true,
+      "notify_channel": "#gtm-alerts"
+    },
+    "stage3": {
+      "enabled": true,
+      "cron": "0 6 * * *",
+      "description": "CRM sync + sequence enrollment — daily at 6am",
+      "max_retries": 2,
+      "retry_delay_seconds": 300,
+      "retry_on": ["ConnectionError", "HTTPError", "Timeout"],
+      "log_level": "INFO",
+      "notify_on_success": true,
+      "notify_on_failure": true,
+      "notify_channel": "#gtm-crm-sync"
+    },
+    "stage4": {
+      "enabled": true,
+      "cron": "0 */4 * * *",
+      "description": "Deliverability monitoring — every 4 hours",
+      "max_retries": 1,
+      "retry_delay_seconds": 60,
+      "retry_on": ["ConnectionError", "Timeout"],
+      "log_level": "INFO",
+      "notify_on_success": false,
+      "notify_on_failure": true,
+      "notify_channel": "#gtm-alerts"
+    }
+  },
+  "defaults": {
+    "timezone": "America/New_York",
+    "max_retries": 2,
+    "retry_delay_seconds": 300,
+    "notification_on_failure": true,
+    "notification_on_success": false,
+    "notify_channel": "#gtm-alerts"
+  }
+}
