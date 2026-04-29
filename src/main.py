@@ -294,11 +294,42 @@ def _stage_entry(name: str, record_count: int, status: str = "completed") -> dic
     return {"name": name, "record_count": record_count, "status": status}
 
 
+def _run_stage_zero(stages: list) -> None:
+    """Optionally run ICP Intelligence (Stage 0) before the main pipeline."""
+    if not settings.ICP_INTELLIGENCE_ENABLED:
+        return
+
+    deal_path = settings.ICP_DEAL_DATA_PATH
+    if not deal_path:
+        raise ValueError(
+            "ICP_INTELLIGENCE_ENABLED=true but ICP_DEAL_DATA_PATH is not set"
+        )
+
+    from src.icp_intelligence_runner import run_icp_intelligence
+
+    pipeline_path = settings.ICP_PIPELINE_DATA_PATH or None
+    tam_path = settings.ICP_TAM_DATA_PATH or None
+    feedback_dir = settings.OUTPUT_DIR if settings.ICP_FEEDBACK_ENABLED else None
+
+    result = run_icp_intelligence(
+        deal_data_path=deal_path,
+        pipeline_data_path=pipeline_path,
+        tam_data_path=tam_path,
+        feedback_dir=feedback_dir,
+        output_dir=settings.OUTPUT_DIR,
+    )
+    profile = result["profile"]
+    log.info("ICP Intelligence: %s", profile.icp_summary)
+    stages.insert(0, _stage_entry("icp_intelligence", profile.total_deals_analyzed))
+
+
 def main() -> None:
     log.info("GTM pipeline starting — MOCK_MODE=%s", settings.MOCK_MODE)
     started_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     run_id = str(uuid.uuid4())
     stages = []
+
+    _run_stage_zero(stages)
 
     apollo, clay, hubspot, zerobounce, neverbounce, validity = _get_clients()
 

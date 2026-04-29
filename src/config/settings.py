@@ -34,6 +34,21 @@ class Settings:
 
         self.LOG_FORMAT: str = os.getenv("LOG_FORMAT", "text")
 
+        # ICP Intelligence (Stage 0) settings
+        self.ICP_INTELLIGENCE_ENABLED: bool = (
+            os.getenv("ICP_INTELLIGENCE_ENABLED", "false").lower() == "true"
+        )
+        self.ICP_DEAL_DATA_PATH: str = os.getenv(
+            "ICP_DEAL_DATA_PATH",
+            os.path.join(self.DATA_DIR, "icp_intelligence", "mock_deal_history.json"),
+        )
+        self.ICP_PIPELINE_DATA_PATH: str = os.getenv("ICP_PIPELINE_DATA_PATH", "")
+        self.ICP_TAM_DATA_PATH: str = os.getenv("ICP_TAM_DATA_PATH", "")
+        self.ICP_FEEDBACK_ENABLED: bool = (
+            os.getenv("ICP_FEEDBACK_ENABLED", "false").lower() == "true"
+        )
+        self.ICP_DATA_SOURCE: str = os.getenv("ICP_DATA_SOURCE", "csv")
+
         self._validate()
 
     _REQUIRED_LIVE_KEYS = [
